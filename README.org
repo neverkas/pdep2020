@@ -1,0 +1,19 @@
+Escribiendo codigo..?
+
+#+NAME: CodeandoPruebas
+#+BEGIN_SRC haskell :sesion "*haskell*" :results output 
+  import Text.Show.Functions
+
+  saludar :: String -> String
+  saludar nombre = "hola " ++ nombre
+
+  doble :: Int -> Int
+  doble n = n*2
+
+  main = do
+    saludar "jorgito"
+    doble 4
+    [1..10]
+
+  main
+#+END_SRC
