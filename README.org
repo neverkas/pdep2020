@@ -1,7 +1,7 @@
 Escribiendo codigo..?
 
 #+NAME: CodeandoPruebas
-#+BEGIN_SRC haskell :sesion "*haskell*" :results output 
+#+BEGIN_SRC haskell :sesion "*haskell*" :results output :exports code
   import Text.Show.Functions
 
   saludar :: String -> String

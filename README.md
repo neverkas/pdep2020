@@ -4,7 +4,6 @@
 
 
 Escribiendo codigo..?
-
     import Text.Show.Functions
     
     saludar :: String -> String
