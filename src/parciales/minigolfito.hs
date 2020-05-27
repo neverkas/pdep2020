@@ -42,6 +42,46 @@ madera :: Palo
 madera (fuerza, precision) = (100, laMitadDe precision, 5)
 
 type NumeroHierro = Int
-
 hierros :: NumeroHierro -> Palo
 hierros numeroHierro (fuerza, precision) = (fuerza*numeroHierro, div precision numeroHierro, numeroHierro*numeroHierro)
+
+
+-- PUNTO 2
+type Nombre = String
+type NombreDelPadre = String
+type Persona = (Nombre, NombreDelPadre, Habilidad)
+type Obstaculo = (Tiro->Bool, Tiro->Tiro)
+condicionObstaculo (condicion, _) = condicion
+efectoObstaculo (_, efecto) = efecto
+
+golpe :: Persona -> Palo -> Tiro
+golpe unaPersona unPalo =
+  unPalo $ habilidad unaPersona
+
+puedeSuperar :: Obstaculo -> Tiro -> Bool
+puedeSuperar obstaculo = condicionObstaculo.obstaculo
+
+suGolpeSuperaElObstaculo :: Persona -> Obstaculo -> Palo -> Bool
+suGolpeSuperaElObstaculo unaPersona unObstaculo =
+  puedeSuperar unObstaculo.golpe unaPersona
+
+palosUtiles :: Persona -> Obstaculo -> [Palo]
+palosUtiles unaPersona unObstaculo =
+  --filter (\palo-> puedeSuperar unObstaculo $ golpe unaPersona palo) palos
+  filter (suGolpeSuperaElObstaculo unaPersona unObstaculo) palos
+
+tieneAlMenosUnPaloUtil :: Persona -> [Obstaculo] -> Bool
+tieneAlMenosUnPaloUtil unaPersona obstaculos =
+  any ((>1).palosUtiles unaPersona) obstaculos
+
+mostrarNombres :: [Persona] -> [String]
+mostrarNombres = map (nombre)
+
+nombresDeLosQuePuedenSuperarTodos :: [Obstaculo] -> [Persona] -> [Persona]
+nombresDeLosQuePuedenSuperarTodos obstaculos =
+  mostrarNombres.filter (tieneAlMenosUnPaloUtil obstaculos)
+
+--cuantosObstaculosSupera :: Tiro -> [Obstaculo] -> Int
+--cuantosObstaculosSupera tiro obstaculos =
+--  foldl (aplicarObstaculoEvaluar tiro) obstaculos
+
