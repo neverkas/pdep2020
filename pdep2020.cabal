@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 32c5274cb8f19f7199caa7ad9208c679fe6496d9c9f87827e71aaa32f31ddb01
+-- hash: 4905f3b36db5e73e59f49914fa93a18c982c1cae9c42d565ca08f704fc3e3710
 
 name:           pdep2020
 version:        0.1.0.0
@@ -26,13 +26,6 @@ source-repository head
   location: https://github.com/githubuser/pdep2020
 
 library
-  exposed-modules:
-      Clase4Ejercicio1
-      Clase4Ejercicio14
-      Clase4Ejercicio2
-      Clase4Ejercicio3
-      Clase4Ejercicio4
-      Clase4Ejercicio9
   other-modules:
       Paths_pdep2020
   hs-source-dirs:
