@@ -59,7 +59,7 @@ type CondicionSobreElTiro = Tiro->Bool
 type EfectoSobreElTiro = Tiro->Tiro
 
 type Obstaculo = (CondicionSobreElTiro, EfectoSobreElTiro)
-elTiroSuperaElObstaculo (condicion, _) = condicion
+seCumplenLasCondicionesDelTiro (condicion, _) = condicion
 efectoSobreElTiro (_, efecto) = efecto
 
 golpe :: Persona -> Palo -> Tiro
@@ -67,7 +67,7 @@ golpe unaPersona unPalo =
   unPalo $ habilidad unaPersona
 
 puedeSuperar :: Obstaculo -> Tiro -> Bool
-puedeSuperar obstaculo = condicionObstaculo.obstaculo
+puedeSuperar unObstaculo =  seCumplenLasCondicionesDelTiro unObstaculo
 
 suGolpeSuperaElObstaculo :: Persona -> Obstaculo -> Palo -> Bool
 suGolpeSuperaElObstaculo unaPersona unObstaculo =
@@ -75,19 +75,18 @@ suGolpeSuperaElObstaculo unaPersona unObstaculo =
 
 palosUtiles :: Persona -> Obstaculo -> [Palo]
 palosUtiles unaPersona unObstaculo =
-  --filter (\palo-> puedeSuperar unObstaculo $ golpe unaPersona palo) palos
   filter (suGolpeSuperaElObstaculo unaPersona unObstaculo) palos
 
 tieneAlMenosUnPaloUtil :: Persona -> [Obstaculo] -> Bool
-tieneAlMenosUnPaloUtil unaPersona obstaculos =
-  any ((>1).palosUtiles unaPersona) obstaculos
+tieneAlMenosUnPaloUtil unaPersona =
+  any ((>1).palosUtiles unaPersona)
 
-mostrarNombres :: [Persona] -> [String]
-mostrarNombres = map (nombre)
+listarSusNombres :: [Persona] -> [String]
+listarSusNombres = map (nombre)
 
-nombresDeLosQuePuedenSuperarTodos :: [Obstaculo] -> [Persona] -> [Persona]
+nombresDeLosQuePuedenSuperarTodos :: [Obstaculo] -> [Persona] -> [String]
 nombresDeLosQuePuedenSuperarTodos obstaculos =
-  mostrarNombres.filter (tieneAlMenosUnPaloUtil obstaculos)
+  listarSusNombres.filter (\unaPersona -> tieneAlMenosUnPaloUtil unaPersona obstaculos)
 
 --cuantosObstaculosSupera :: Tiro -> [Obstaculo] -> Int
 --cuantosObstaculosSupera tiro obstaculos =
