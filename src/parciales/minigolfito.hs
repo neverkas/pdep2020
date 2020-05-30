@@ -19,7 +19,9 @@ mayorSegun f a b
 
 palos = putter : madera : map hierro [1 .. 10]
 
--- PUNTO 1
+--
+-- # PUNTO 1
+--
 type Velocidad = Int
 type Precision = Int
 type Altura = Int
@@ -27,7 +29,6 @@ type Fuerza = Int
 
 type Tiro = (Velocidad, Precision, Altura)
 type Habilidad = (Fuerza, Precision)
-
 elDobleDe :: Int -> Int
 elDobleDe = (*2)
 
@@ -50,7 +51,9 @@ hierro :: NumeroHierro -> Palo
 hierro numeroHierro (fuerza, precision) =
   (fuerza*numeroHierro, div precision numeroHierro, elCuadradoDe numeroHierro)
 
--- PUNTO 2
+--
+-- # PUNTO 2
+--
 type Nombre = String
 type NombreDelPadre = String
 type Persona = (Nombre, NombreDelPadre, Habilidad)
@@ -58,16 +61,18 @@ type Persona = (Nombre, NombreDelPadre, Habilidad)
 type CondicionSobreElTiro = Tiro->Bool
 type EfectoSobreElTiro = Tiro->Tiro
 
+--type Obstaculo = Tiro -> (CondicionSobreElTiro, EfectoSobreElTiro)
 type Obstaculo = (CondicionSobreElTiro, EfectoSobreElTiro)
-seCumplenLasCondicionesDelTiro (condicion, _) = condicion
-efectoSobreElTiro (_, efecto) = efecto
+elTiroCumpleCondicionesDelObstaculo (condicion, _) = condicion
+elTiroLuegoDePasarPorElObstaculo (_, efecto) = efecto
 
 golpe :: Persona -> Palo -> Tiro
 golpe unaPersona unPalo =
   unPalo $ habilidad unaPersona
 
+--puedeSuperar :: Obstaculo -> Bool
 puedeSuperar :: Obstaculo -> Tiro -> Bool
-puedeSuperar unObstaculo =  seCumplenLasCondicionesDelTiro unObstaculo
+puedeSuperar unObstaculo =   elTiroCumpleCondicionesDelObstaculo unObstaculo
 
 suGolpeSuperaElObstaculo :: Persona -> Obstaculo -> Palo -> Bool
 suGolpeSuperaElObstaculo unaPersona unObstaculo =
@@ -88,7 +93,18 @@ nombresDeLosQuePuedenSuperarTodos :: [Obstaculo] -> [Persona] -> [String]
 nombresDeLosQuePuedenSuperarTodos obstaculos =
   listarSusNombres.filter (\unaPersona -> tieneAlMenosUnPaloUtil unaPersona obstaculos)
 
---cuantosObstaculosSupera :: Tiro -> [Obstaculo] -> Int
---cuantosObstaculosSupera tiro obstaculos =
---  foldl (aplicarObstaculoEvaluar tiro) obstaculos
+--
+-- # PUNTO 3
+--
+puedePasarPorObstaculo :: Tiro -> Obstaculo -> Bool
+puedePasarPorObstaculo unTiro unObstaculo =
+  elTiroCumpleCondicionesDelObstaculo unObstaculo $ (elTiroLuegoDePasarPorElObstaculo unObstaculo) unTiro
 
+cuantosObstaculosSupera :: Tiro -> [Obstaculo] -> Int
+cuantosObstaculosSupera tiro =
+  length . filter (puedePasarPorObstaculo tiro)
+
+paloMasUtil :: Persona -> [Obstaculo] -> Palo
+paloMasUtil unaPersona obstaculos = undefined
+  --maximoSegun
+  --palosUtiles unaPersona $ obstaculos
