@@ -49,5 +49,32 @@ reducirSaludEn danio = max 0.((-) danio)
 --
 
 -- 2a. esMalvado, que retorna verdadero si alguno de los elementos que tiene el personaje en cuestión es de tipo “Maldad”.
+esMalvado :: Personaje -> Bool
+esMalvado personaje = (algunoEsTipo "Malvado".elementos) personaje
 
+algunoEsTipo :: String -> [Elemento] -> Bool
+algunoEsTipo tipoElegido = any ((== tipoElegido).tipo)
+
+-- 2b. danioQueProduce :: Personaje -> Elemento -> Float
+-- que retorne la diferencia entre la salud inicial del personaje y la salud del personaje
+-- luego de usar el ataque del elemento sobre él.
+danioQueProduce :: Personaje -> Elemento -> Float
+danioQueProduce personaje elemento =
+  salud personaje - (salud.luegoDeAtaqueCon elemento) personaje
+
+luegoDeAtaqueCon :: Elemento -> Transformacion
+luegoDeAtaqueCon elemento = ataque elemento
+
+-- 2c. enemigosMortales que dado un personaje y una lista de enemigos
+-- devuelve la lista de los enemigos que pueden llegar a matarlo con un solo elemento.
+-- Esto sucede si luego de aplicar el efecto de ataque del elemento, el personaje queda con salud igual a 0.
+type Enemigo = Personaje
+enemigosMortales :: Personaje -> [Enemigo] -> [Enemigo]
+enemigosMortales personaje = filter (casiLoMataA personaje)
+
+casiLoMataA :: Personaje -> Enemigo -> Bool
+casiLoMataA personaje = algunoEsMortiferoCon personaje.elementos
+
+algunoEsMortiferoCon :: Personaje -> [Elemento] -> Bool
+algunoEsMortiferoCon personaje = any ((==0).danioQueProduce personaje)
 
