@@ -115,7 +115,7 @@ unEsbirro = UnElemento "Maldad" (causarDanio 1) ()
 -- que tiene como elementos concentración nivel 3 y una katana mágica (de tipo "Magia"
 -- cuyo efecto ofensivo es causar 1000 puntos de daño) y vive en el año 200.
 jack :: Personaje
-jack = UnPersonaje "Jack" 300 (concentracion 3) [katanaMagica] 200
+jack = UnPersonaje "Jack" 300 [concentracion 3, katanaMagica] 200
 
 katanaMagica :: Elemento
 katanaMagica = UnElemento "Magia" (causarDanio 1000) ()
@@ -123,3 +123,58 @@ katanaMagica = UnElemento "Magia" (causarDanio 1000) ()
 -- 3d. Definir aku :: Int -> Float -> Personaje que recibe el año en el que vive y
 -- la cantidad de salud con la que debe ser construido. Los elementos que tiene
 -- dependerán en parte de dicho año. Los mismos incluyen:
+--   1. Concentración nivel 4
+--   2. Tantos esbirros malvados como 100 veces el año en el que se encuentra.
+--   3. Un portal al futuro, de tipo “Magia” cuyo ataque es enviar al personaje al futuro
+--      (donde el futuro es 2800 años después del año indicado para aku),
+--      y su defensa genera un nuevo aku para el año futuro correspondiente que mantenga
+--      la salud que tenga el personaje al usar el portal.
+
+type Salud = Float
+
+aku :: Anio -> Salud -> Personaje
+aku anioQueVive suSalud = UnPersonaje{
+  nombre = "aku",
+  salud = suSalud,
+  elementos = elementosSegun anioQueVive suSalud
+}
+
+elementosSegun :: Anio -> Salud -> [Elemento]
+elementosSegun anioQueVive suSalud = [
+  concentracion 4,
+  --(concat.crearEsbirrosHasta) (anioQueVive*100),
+  UnElemento "Magia" (mandarAlAnio $ 2800+anioQueVive) aku]
+
+--
+-- # PUNTO 4
+--
+
+luchar :: Personaje -> Personaje -> (Personaje, Personaje)
+luchar atacante defensor
+  | casiLoMataA atacante defensor = (defensor, atacante)
+  | otherwise = luchar (defenderseDe atacante $ defensor) (atacarA defensor $ atacante)
+
+type Atacante = Personaje
+type Defensor = Personaje
+
+defenderseDe :: Atacante -> Defensor -> Atacante
+defenderseDe unAtacante unDefensor=
+  foldl (\atacante elemento-> defensa elemento $ atacante) unAtacante (elementos unDefensor)
+
+atacarA :: Defensor -> Atacante -> Defensor
+atacarA unDefensor unAtacante =
+  foldl (\atacante elemento-> ataque elemento $ atacante) unDefensor (elementos unAtacante)
+
+--
+-- # PUNTO 5
+--
+
+f :: Eq a =>
+  (a -> ( (b->d), (b->d) ) )
+  -> (c->a)
+  -> a
+  -> [b]
+  -> [d]
+f x y z
+    | y 0 == z = map (fst.x z)
+    | otherwise = map (snd.x (y 0))
