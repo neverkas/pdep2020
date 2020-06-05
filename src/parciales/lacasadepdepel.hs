@@ -142,3 +142,27 @@ sumar queCosa deQuienes = (sum.map (queCosa)) deQuienes
 
 cuantasArmasTienen :: [Ladron] -> Int
 cuantasArmasTienen estosLadrones = (length.map armas) estosLadrones
+
+-- # PUNTO 8
+type PlanParaRebelarse = Ladron -> Ladron
+
+rebelarseContra :: Ladron -> Rehen -> Ladron
+rebelarseContra esteLadron cualRehen = foldr ($) esteLadron (planes cualRehen)
+
+
+atacarAlLadronCon :: Rehen -> PlanParaRebelarse
+atacarAlLadronCon suCompaniero esteLadron =
+  (sacarleTantasArmasA esteLadron.divididoPor 10.cantidadLetrasDelnombre) suCompaniero
+
+divididoPor :: Int -> Int -> Int
+divididoPor cuanto = flip div cuanto
+
+cantidadDeLetrasDelNombre :: Ladron -> Int
+cantidadDeLetrasDelNombre = length.nombre
+
+sacarleTantasArmasA :: Ladron -> Int -> Ladron
+sacarleTantasArmasA (UnLadron nombre habilidades armas) cuantasArmas =
+  unLadron nombre habilidades (drop cuantasArmas armas)
+
+esconderse :: PlanParaRebelarse
+esconderse esteLadron = (sacarleTantasArmasA esteLadron.divididoPor 3.cuantasHabilidadesTiene) deEsteLadron
