@@ -194,6 +194,9 @@ atacarA unDefensor unAtacante =
 
 f :: (Eq a, Num c) =>
      (a -> b -> (d, d)) -> (c->a) -> a -> [b] -> [d]
+-- dato importante...
+-- ese "b" es el elemento que recibe de la lista [b]
+-- es decir recibe como valor el parametro "z" y ademas el elemento de la lista [b]
 --   (a -> ( (b->d), (b->d) ) ) -> (c->a) -> a -> [b] -> [d]
 
 -- no te acordabas como asignar varias clases como Eq, Num
