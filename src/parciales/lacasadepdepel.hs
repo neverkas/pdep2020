@@ -1,5 +1,7 @@
 module ParcialLaCasaDePdepEl where
 
+import Text.Show.Functions
+
 -- # PUNTO 1
 
 data Ladron = UnLadron{
@@ -12,11 +14,11 @@ data Rehen = UnRehen{
   nombreDelRehen :: String,
   nivelDeComplot :: Int,
   nivelDeMiedo :: Int,
-  planes :: [Plan]
+  planes :: [PlanParaRebelarse]
 }deriving(Show)
 
 -- type Arma = Pistola | Ametralladora
-data Arma = Pistola | Ametralladora
+data Arma = Pistola | Ametralladora deriving(Show)
 
 data Pistola = UnaPistola{
   calibre :: Int
@@ -54,7 +56,7 @@ arturito = UnRehen{
   nombreDelRehen = "Arturito",
   nivelDeComplot = 70,
   nivelDeMiedo = 50,
-  planes = [esconderse, atacarCon pablo]
+  planes = [esconderse, atacarAlLadronCon pablo]
 }
 
 
@@ -94,10 +96,13 @@ causarMiedoEn (UnRehen nombre complot miedo planes) = UnRehen nombre complot mie
 
 -- revisar si te sirve pattern matching
 hacerseElMalo :: Intimidacion
-hacerseElMalo unLadron unRehen
-  | (seLlama "Berlin".nombre) ladron = (cambiarMiedoEn.(+) cuantasHabilidadesTiene ladron) unRehen
-  | (seLlama "Rio".nombre) ladron = cambiarComplotEn (+20) unRehen
-  | otherwise = cambiarMiedo (+10) unRehen
+hacerseElMalo esteLadron unRehen
+  | (seLlamaIgualA "Berlin".nombreDelLadron) esteLadron = (cambiarMiedoEn.(+) cuantasHabilidadesTiene esteLadron) unRehen
+  | (seLlamaIgualA "Rio".nombreDelLadron) esteLadron = cambiarComplotEn (+20) unRehen
+  | otherwise = cambiarMiedoEn (+10) unRehen
+
+seLlamaIgualA :: String -> String -> Bool
+seLlamaIgualA esteNombre = (== esteNombre)
 
 cambiarMiedoEn :: (Int->Int) -> Rehen -> Rehen
 cambiarMiedoEn cuanto (UnRehen nombre complot miedo planes) =
@@ -136,7 +141,10 @@ estoPintaMal variosLadrones variosRehenes =
         armasDeLosLadrones = cuantasArmasTienen variosLadrones
 
 promedioDe :: (Rehen->Int) -> [Rehen] -> Int
-promedioDe queCosa deEstosRehenes = (flip div cantidad deEstosRehenes.sumar queCosa) deEstosRehenes
+promedioDe queCosa deEstosRehenes = (flip div cantidadDe deEstosRehenes.sumar queCosa) deEstosRehenes
+
+cantidadDe :: [Rehen] -> Int
+cantidadDe = length
 
 sumar :: (Rehen->Int) -> [Rehen] -> Int
 sumar queCosa deQuienes = (sum.map (queCosa)) deQuienes
@@ -161,20 +169,20 @@ rebelarseContra esteLadron cualRehen = foldr ($) esteLadron (planes cualRehen)
 
 atacarAlLadronCon :: Rehen -> PlanParaRebelarse
 atacarAlLadronCon suCompaniero esteLadron =
-  (sacarleTantasArmasA esteLadron.divididoPor 10.cantidadLetrasDelnombre) suCompaniero
+  (sacarleTantasArmasA esteLadron.divididoPor 10.cantidadDeLetrasDelNombre) suCompaniero
 
 divididoPor :: Int -> Int -> Int
 divididoPor cuanto = flip div cuanto
 
-cantidadDeLetrasDelNombre :: Ladron -> Int
-cantidadDeLetrasDelNombre = length.nombre
+cantidadDeLetrasDelNombre :: Rehen -> Int
+cantidadDeLetrasDelNombre = length.nombreDelRehen
 
 sacarleTantasArmasA :: Ladron -> Int -> Ladron
 sacarleTantasArmasA (UnLadron nombre habilidades armas) cuantasArmas =
-  unLadron nombre habilidades (drop cuantasArmas armas)
+  UnLadron nombre habilidades (drop cuantasArmas armas)
 
 esconderse :: PlanParaRebelarse
-esconderse esteLadron = (sacarleTantasArmasA esteLadron.divididoPor 3.cuantasHabilidadesTiene) deEsteLadron
+esconderse deEsteLadron = (sacarleTantasArmasA deEsteLadron.divididoPor 3.cuantasHabilidadesTiene) deEsteLadron
 
 -- # PUNTO 9
 ejecutarPlanValenciaPor :: [Ladron] -> [Rehen] -> Int
@@ -195,3 +203,16 @@ seLesRebelanTodos susRehenes estosLadrones =
 armarseCon :: Arma -> [Ladron] -> [Ladron]
 armarseCon estaArma estosLadrones = map (conseguirUnArma estaArma) estosLadrones
 -}
+
+-- PUNTO 10
+-- No, porque no terminaria de completar el numero de armas que tienen, por tanto no podria multiplicar 1000000
+
+-- PUNTO 11
+-- No, porque una de las habilidades de los rehenes es esconderse, y similar al anterior no terminaria de
+-- saber cuantas habilidades tiene para diviir por 3
+
+-- PUNTO 12
+--funcion :: Num a1 => b -> (a->d) -> (b->(a->Bool)) -> h -> [a] ->
+-- funcion :: Ord x => b -> a1 -> (b->(d->Bool)) -> x -> [a] -> Bool
+-- funcion cond num lista str = (> str) . sum . map (length . num) . filter (lista cond)
+
