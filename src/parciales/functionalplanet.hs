@@ -77,11 +77,50 @@ laTortuga = UnaMascota{
   duenio = ("Fede Scarpa", 30),
   nivelEnergia = 30,
   estaDistraida = True,
-  trucos = tomarAgua:(cuantasVecesRepetirlo 3 sentarse)
+  trucos = [tomarAgua,cuantasVecesRepetirlo 3 sentarse]
 }
 
-cuantasVecesRepetirlo :: Int -> Truco -> [Truco]
+-- REVISAR
+cuantasVecesRepetirlo :: Int -> Truco -> Truco
+--cuantasVecesRepetirlo numeroDeVeces esteTruco= (!! numeroDeVeces) (iterate esteTruco)
+cuantasVecesRepetirlo numeroDeVeces esteTruco= (!! numeroDeVeces) (repeat esteTruco)
 
+-- PUNTO 2
+-- resuelto mas arriba
 
+-- PUNTO 3
+realizarPresentacion :: Truco
+realizarPresentacion conEstaMascota = foldl (realizarTruco) conEstaMascota (trucos conEstaMascota)
 
+realizarTruco :: Mascota -> Truco -> Mascota
+realizarTruco conEstaMascota elTruco = elTruco conEstaMascota
+-- otra alternativa
+realizarTruco' = flip
 
+-- PUNTO 4
+type Resultado = (String, Int, Int, Int)
+
+resultados :: Mascota -> Resultado
+resultados deEstaMascota = (decidirPuntacion.realizarPresentacion) deEstaMascota
+
+decidirPuntacion :: Mascota -> Resultado
+decidirPuntacion deEstaMascota =
+  (nombreMascota deEstaMascota, calificacionEnergia, calificacionHabilidad, calificacionTernura)
+  where calificacionEnergia = calificarEnergia deEstaMascota
+        calificacionHabilidad = calificarHabilidad deEstaMascota
+        calificacionTernura = calificarTernura deEstaMascota
+
+calificarEnergia :: Mascota -> Int
+calificarEnergia (UnaMascota _ edad _ nivelEnergia _ _) = edad*nivelEnergia
+
+calificarHabilidad :: Mascota -> Int
+calificarHabilidad (UnaMascota _ _ (_, aniosExpDelDuenio) _ trucos _) = (((*) aniosExpDelDuenio).length) trucos
+
+calificarTernura :: Mascota -> Int
+calificarTernura (UnaMascota nombre edad _ _ _ _)
+  | (empiezaCon "Pobre") nombre = 20
+  | otherwise = 20-edad
+
+empiezaCon :: String -> String -> Bool
+empiezaCon estaPalabra esteNombre =
+  ((==estaPalabra).take (length estaPalabra)) esteNombre
