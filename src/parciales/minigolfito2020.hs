@@ -79,22 +79,61 @@ data Obstaculo = UnObstaculo{
 
 tunelConRampita :: Tiro -> Obstaculo
 tunelConRampita unTiro = UnObstaculo{
-  condicion = suAlturaEs (==0) unTiro && suPrecisionEs (>90) unTiro,
-  efecto = (cambiarPrecisionA 100.cambiarVelocidadEn (*2)) unTiro
+  condicion = compararEntre altura (==0) unTiro && compararEntre precision (>90) unTiro,
+  -- condicion = suAlturaEs ((==) 0) unTiro && suPrecisionEs ((>) 90) unTiro,
+  -- efecto = (cambiarA precision (+100). cambiarA velocidad (*2)) unTiro
+  efecto = (cambiarPrecisionA ((+100).(*0)).cambiarVelocidadA (*2)) unTiro
 }
 
-unaLaguna :: Tiro -> Obstaculo
+unaLaguna :: Int -> Tiro -> Obstaculo
 unaLaguna suLargoEs unTiro = UnObstaculo{
-  condicion = elTiroEs (>80) unTiro && suAlturaEs (between 1 5) unTiro,
-  efecto = cambiarAlturaA (flip div suLargoEs) unTiro
+  -- condicion = laVelocidadEs (>80) unTiro && suAlturaEs (between 1 5) unTiro,
+  condicion = compararEntre velocidad (>80) unTiro && compararEntre altura (between 1 5) unTiro,
+  -- se podia mejorar la expresividad
+  -- efecto = cambiarAlturaA (flip div suLargoEs) unTiro
+  efecto = cambiarAlturaA (divididoPor suLargoEs) unTiro
 }
 
 unHoyo :: Tiro -> Obstaculo
 unHoyo unTiro = UnObstaculo{
-  condicion = elTiroEs (between 5 20) unTiro && suAlturaEs (==0) unTiro && suPrecisionEs (>95) unTiro
-  efecto = (cambiarAlturaA 0.cambiarVelocidadA 0.cambiarPrecisionA 0) unTiro
+  -- condicion = elTiroEs (between 5 20) unTiro && suAlturaEs (==0) unTiro && suPrecisionEs (>95) unTiro,
+  condicion = compararEntre velocidad (between 5 20) unTiro && compararEntre altura (==0) unTiro && compararEntre precision (>95) unTiro,
+  -- efecto = (cambiarAlturaA (*0).cambiarVelocidadA (*0).cambiarPrecisionA (*0)) unTiro
+  efecto = cambiarAtributosAcero unTiro
 }
 
---tiroLuegoDelObstaculo esteTiro unObstaculo =
---([alRasDelSuelo, suPrecisionEs (>90)], (cambiarPrecisionA 100.cambiarVelocidadEn (*2)))
---where alRasDelSuelo = suAlturaEs (==0)
+tiroLuegoDelObstaculo esteTiro unObstaculo
+  | superaElObstaculo unObstaculo esteTiro = (efecto unObstaculo) esteTiro
+  | otherwise = cambiarAtributosAcero esteTiro
+
+
+-- PENDIENTE: creo que no se puede hacer tan generico..
+-- cambiarA :: Atributo -> (Int->Int) -> Efecto
+-- cambiarA suAtributo porCuanto esteTiro = (porCuanto.suAtributo) esteTiro
+
+cambiarAtributosAcero :: Efecto
+cambiarAtributosAcero unTiro = (cambiarAlturaA (*0).cambiarVelocidadA (*0).cambiarPrecisionA (*0)) unTiro
+
+divididoPor :: Int -> (Int -> Int)
+divididoPor cuanto = flip div cuanto
+
+cambiarPrecisionA :: (Int->Int) -> Efecto
+cambiarPrecisionA porCuanto (UnTiro velocidad precision altura) =
+  UnTiro velocidad (porCuanto precision) altura
+
+cambiarAlturaA :: (Int->Int) -> Efecto
+cambiarAlturaA porCuanto (UnTiro velocidad precision altura) =
+  UnTiro velocidad precision (porCuanto altura)
+
+cambiarVelocidadA :: (Int->Int) -> Efecto
+cambiarVelocidadA porCuanto (UnTiro velocidad precision altura) =
+  UnTiro (porCuanto velocidad) precision altura
+
+type Atributo = Tiro->Int
+compararEntre :: Atributo -> (Int->Bool) -> Condicion
+compararEntre suAtributo esteCriterio esteTiro = (esteCriterio.suAtributo) esteTiro
+-- repeticion de logica por cada atributo..
+-- suAlturaEs :: (Int->Bool) -> Condicion
+-- suAlturaEs criterio esteTiro = (criterio.altura) esteTiro
+-- suPrecisionEs :: (Int->Bool) -> Condicion
+-- suPrecisionEs criterio esteTiro = (criterio.precision) esteTiro
