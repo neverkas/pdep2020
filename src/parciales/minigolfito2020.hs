@@ -48,9 +48,10 @@ hierros suNumero (Habilidad fuerza precision) =
 
 
 -- Revisar
-palos :: [Palo]
-palos = putter : madera : listaDeHierros
-listaDeHierros = map hierros [1..10]
+--palos :: [Palo]
+palos = putter : madera : listaHierros
+listaHierros = map hierros [1..10]
+--listaHierros n = (!! n) (map hierros [1..10])
 
 queNoSeaMenorACero :: Int -> Int
 queNoSeaMenorACero = max 0
@@ -86,6 +87,16 @@ tunelConRampita unTiro =
   -- condicion = suAlturaEs ((==) 0) unTiro && suPrecisionEs ((>) 90) unTiro,
   -- efecto = (cambiarA precision (+100). cambiarA velocidad (*2)) unTiro
   (cambiarPrecisionA ((+100).(*0)).cambiarVelocidadA (*2)) unTiro)
+
+unaLaguna :: Int -> Obstaculo
+unaLaguna suLargoEs unTiro =
+  (compararEntre velocidad (>80) unTiro && compararEntre altura (between 1 5) unTiro,
+  cambiarAlturaA (divididoPor suLargoEs) unTiro)
+
+unHoyo :: Obstaculo
+unHoyo unTiro =
+  (compararEntre velocidad (between 5 20) unTiro && compararEntre altura (==0) unTiro && compararEntre precision (>95) unTiro,
+  cambiarAtributosAcero unTiro)
 {-
 unaLaguna :: Int -> Tiro -> Obstaculo
 unaLaguna suLargoEs unTiro = UnObstaculo{
@@ -108,8 +119,8 @@ tiroLuegoDelObstaculo :: Tiro -> Obstaculo -> Tiro
 tiroLuegoDelObstaculo esteTiro unObstaculo
   | superaElObstaculo = producirEfecto
   | otherwise = cambiarAtributosAcero esteTiro
-  where superaElObstaculo = condicion (unObstaculo esteTiro)
-        producirEfecto = efecto (unObstaculo esteTiro)
+   where superaElObstaculo = condicion (unObstaculo esteTiro)
+         producirEfecto = efecto (unObstaculo esteTiro)
 
 -- PENDIENTE: creo que no se puede hacer tan generico..
 -- cambiarA :: Atributo -> (Int->Int) -> Efecto
@@ -141,3 +152,21 @@ compararEntre suAtributo esteCriterio esteTiro = (esteCriterio.suAtributo) esteT
 -- suAlturaEs criterio esteTiro = (criterio.altura) esteTiro
 -- suPrecisionEs :: (Int->Bool) -> Condicion
 -- suPrecisionEs criterio esteTiro = (criterio.precision) esteTiro
+
+-- # PUNTO 4
+palosUtiles :: Jugador -> Obstaculo -> [Palo]
+palosUtiles conEsteJugador esteObstaculo =
+  filter (esUtilCon esteObstaculo.golpe conEsteJugador) palos
+
+esUtilCon :: Obstaculo -> Tiro -> Bool
+esUtilCon esteObstaculo esteTiro = condicion (esteObstaculo esteTiro)
+
+cuantosObstaculosSupera :: [Obstaculo] -> Tiro -> Int
+cuantosObstaculosSupera variosObstaculos esteTiro =
+  (contarCuantos.filter (esSuperadoPor esteTiro)) variosObstaculos
+
+esSuperadoPor :: Tiro -> Obstaculo -> Bool
+esSuperadoPor esteTiro unObstaculo = condicion (unObstaculo esteTiro)
+
+contarCuantos :: [a] -> Int
+contarCuantos deEstaLista = length deEstaLista
