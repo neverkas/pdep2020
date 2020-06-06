@@ -69,22 +69,24 @@ golpe porQuien conEstePalo = conEstePalo (habilidad porQuien)
 -- # PUNTO 3
 type Efecto = Tiro -> Tiro
 type Condicion = Tiro -> Bool
+-- data Obstaculo = UnObstaculo{
+--   condicion :: Bool,
+--   efecto :: Tiro
+-- }
 
-data Obstaculo = UnObstaculo{
-  condicion :: Bool,
-  efecto :: Tiro
-}
+type Obstaculo = Tiro -> (Bool, Tiro)
+condicion (suCondicion, _) = suCondicion
+efecto (_, suEfecto) = suEfecto
 -- me parece que con data queda mas ordenado..
 --type Obstaculo = Tiro -> (Condicion, Efecto)
 
-tunelConRampita :: Tiro -> Obstaculo
-tunelConRampita unTiro = UnObstaculo{
-  condicion = compararEntre altura (==0) unTiro && compararEntre precision (>90) unTiro,
+tunelConRampita :: Obstaculo
+tunelConRampita unTiro =
+  (compararEntre altura (==0) unTiro && compararEntre precision (>90) unTiro,
   -- condicion = suAlturaEs ((==) 0) unTiro && suPrecisionEs ((>) 90) unTiro,
   -- efecto = (cambiarA precision (+100). cambiarA velocidad (*2)) unTiro
-  efecto = (cambiarPrecisionA ((+100).(*0)).cambiarVelocidadA (*2)) unTiro
-}
-
+  (cambiarPrecisionA ((+100).(*0)).cambiarVelocidadA (*2)) unTiro)
+{-
 unaLaguna :: Int -> Tiro -> Obstaculo
 unaLaguna suLargoEs unTiro = UnObstaculo{
   -- condicion = laVelocidadEs (>80) unTiro && suAlturaEs (between 1 5) unTiro,
@@ -101,11 +103,13 @@ unHoyo unTiro = UnObstaculo{
   -- efecto = (cambiarAlturaA (*0).cambiarVelocidadA (*0).cambiarPrecisionA (*0)) unTiro
   efecto = cambiarAtributosAcero unTiro
 }
-
+-}
+tiroLuegoDelObstaculo :: Tiro -> Obstaculo -> Tiro
 tiroLuegoDelObstaculo esteTiro unObstaculo
-  | superaElObstaculo unObstaculo esteTiro = (efecto unObstaculo) esteTiro
+  | superaElObstaculo = producirEfecto
   | otherwise = cambiarAtributosAcero esteTiro
-
+  where superaElObstaculo = condicion (unObstaculo esteTiro)
+        producirEfecto = efecto (unObstaculo esteTiro)
 
 -- PENDIENTE: creo que no se puede hacer tan generico..
 -- cambiarA :: Atributo -> (Int->Int) -> Efecto
