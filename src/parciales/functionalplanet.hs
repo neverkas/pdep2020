@@ -138,7 +138,7 @@ ganadorDeCategoriaSegun esteCriterio deEstasMascotas =
 -- 1. Criterio seria la funcion (Mascota->Int),
 -- 2. Los dos que le siguen Mascota->Mascota son el primero y segundo del foldl1
 -- 3. El ultimo es la salida
--- Obs: Estabas en duda de que si usabas guardas, ibasa hacer una funcion recursiva.. PERO NO!
+-- Obs: Estabas en duda de que si usabas guardas, ibas a hacer una funcion recursiva.. PERO NO!
 laMejorSegun :: Criterio -> Mascota -> Mascota -> Mascota
 laMejorSegun esteCriterio mascotaA mascotaB
  | esteCriterio mascotaA > esteCriterio mascotaB = mascotaA
@@ -151,4 +151,16 @@ laMejorSegun esteCriterio mascotaA mascotaB
   --foldl1 (\mascota-> max.esteCriterio mascota) deEstasMascotas
 
 -- PUNTO 6
+-- Esta buena la idea, pero.. se repite logica (identico a ganadorDeCategoriasSegun)
 ganadorDelConcurso :: [Mascota] -> Mascota
+ganadorDelConcurso variasMascotas = foldl1 (cualTieneMayorPuntaje) variasMascotas
+
+cualTieneMayorPuntaje :: Mascota -> Mascota -> Mascota
+cualTieneMayorPuntaje mascotaA mascotaB
+  | laSumaDeLosCriterios mascotaA > laSumaDeLosCriterios mascotaB = mascotaA
+  | otherwise = mascotaB
+  where laSumaDeLosCriterios mascota = (sumarPuntajes.resultados) mascota
+
+sumarPuntajes :: Resultado -> Int
+sumarPuntajes (_, porEnergia, porHabilidad, porTernura) = ((+) porEnergia . (+) porHabilidad) porTernura
+
