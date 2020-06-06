@@ -110,13 +110,15 @@ decidirPuntacion deEstaMascota =
         calificacionHabilidad = calificarHabilidad deEstaMascota
         calificacionTernura = calificarTernura deEstaMascota
 
-calificarEnergia :: Mascota -> Int
+type Criterio = Mascota->Int
+
+calificarEnergia :: Criterio
 calificarEnergia (UnaMascota _ edad _ nivelEnergia _ _) = edad*nivelEnergia
 
-calificarHabilidad :: Mascota -> Int
+calificarHabilidad :: Criterio
 calificarHabilidad (UnaMascota _ _ (_, aniosExpDelDuenio) _ trucos _) = (((*) aniosExpDelDuenio).length) trucos
 
-calificarTernura :: Mascota -> Int
+calificarTernura :: Criterio
 calificarTernura (UnaMascota nombre edad _ _ _ _)
   | (empiezaCon "Pobre") nombre = 20
   | otherwise = 20-edad
@@ -124,3 +126,29 @@ calificarTernura (UnaMascota nombre edad _ _ _ _)
 empiezaCon :: String -> String -> Bool
 empiezaCon estaPalabra esteNombre =
   ((==estaPalabra).take (length estaPalabra)) esteNombre
+
+ganadorDeCategoriaSegun :: Criterio -> [Mascota] -> Mascota
+ganadorDeCategoriaSegun esteCriterio deEstasMascotas =
+  (laMejorEs.map realizarPresentacion) deEstasMascotas
+  where laMejorEs mascotas = foldl1 (laMejorSegun esteCriterio) mascotas
+  -- te estabas olvidando de pasarle la funcion auxiliar laMejorSegun
+  -- where laMejorEs mascotas = foldl1 (esteCriterio) mascotas
+--where laMejorEs mascotas = foldl1 (\mascota-> esteCriterio mascota) mascotas
+
+-- 1. Criterio seria la funcion (Mascota->Int),
+-- 2. Los dos que le siguen Mascota->Mascota son el primero y segundo del foldl1
+-- 3. El ultimo es la salida
+-- Obs: Estabas en duda de que si usabas guardas, ibasa hacer una funcion recursiva.. PERO NO!
+laMejorSegun :: Criterio -> Mascota -> Mascota -> Mascota
+laMejorSegun esteCriterio mascotaA mascotaB
+ | esteCriterio mascotaA > esteCriterio mascotaB = mascotaA
+ | otherwise = mascotaB
+
+-- aca estabas tratando de hacer el foldl1 pero te perdiste...
+-- no te acordabas que devuelve un primero y segundo elemento
+--laMejorSegun :: Criterio -> [Mascota] -> Mascota
+--laMejorSegun esteCriterio deEstasMascotas =
+  --foldl1 (\mascota-> max.esteCriterio mascota) deEstasMascotas
+
+-- PUNTO 6
+ganadorDelConcurso :: [Mascota] -> Mascota
