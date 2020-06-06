@@ -69,8 +69,9 @@ cuantasHabilidadesTiene = length.habilidades
 
 -- # PUNTO 3
 -- REVISAR
-conseguirUnArma :: Ladron -> Ladron
-conseguirUnArma (UnLadron nombre habilidades armas) = UnLadron nombre habilidades (Arma:armas)
+conseguirUnArma :: Arma -> Ladron -> Ladron
+conseguirUnArma estaArma (UnLadron nombre habilidades armas) =
+  UnLadron nombre habilidades (estaArma:armas)
 
 -- nuevaArma = Arma
 
@@ -146,9 +147,17 @@ cuantasArmasTienen estosLadrones = (length.map armas) estosLadrones
 -- # PUNTO 8
 type PlanParaRebelarse = Ladron -> Ladron
 
+todosSeRebelanContra :: Ladron -> [Rehen] -> Ladron
+--todosSeRebelanContra :: Ladron -> [Rehen] ->[Rehen]
+todosSeRebelanContra esteLadron variosRehenes =
+  foldl (rebelarseContra) esteLadron (todosPierden10DeComplot variosRehenes)
+--  (map (rebelarseContra esteLadron).cambiarComplotEn ((-) 10)) variosRehenes
+
+todosPierden10DeComplot :: [Rehen] -> [Rehen]
+todosPierden10DeComplot quienes = map (cambiarComplotEn ((-) 10)) quienes
+
 rebelarseContra :: Ladron -> Rehen -> Ladron
 rebelarseContra esteLadron cualRehen = foldr ($) esteLadron (planes cualRehen)
-
 
 atacarAlLadronCon :: Rehen -> PlanParaRebelarse
 atacarAlLadronCon suCompaniero esteLadron =
@@ -166,3 +175,23 @@ sacarleTantasArmasA (UnLadron nombre habilidades armas) cuantasArmas =
 
 esconderse :: PlanParaRebelarse
 esconderse esteLadron = (sacarleTantasArmasA esteLadron.divididoPor 3.cuantasHabilidadesTiene) deEsteLadron
+
+-- # PUNTO 9
+ejecutarPlanValenciaPor :: [Ladron] -> [Rehen] -> Int
+ejecutarPlanValenciaPor estosLadrones susRehenes =
+  (escaparseConElDinero.armarseCon (UnaAmetralladora 45).seRebelanSusRehenes) estosLadrones
+  where armarseCon estaArma = map (conseguirUnArma estaArma)
+        escaparseConElDinero = (*1000000).cuantasArmasTienen
+        seRebelanSusRehenes = map (\cadaLadron -> todosSeRebelanContra cadaLadron susRehenes)
+{-
+ejecutarPlanValenciaPor :: [Ladron] -> [Rehen] -> Int
+ejecutarPlanValenciaPor estosLadrones susRehenes =
+  (escaparConElDineroSegun cuantasArmasTienen.armarseCon ametralladora.seLesRebelanTodos susRehenes) estosLadrones
+
+seLesRebelanTodos :: [Rehen] -> [Ladron] -> [Ladron]
+seLesRebelanTodos susRehenes estosLadrones =
+  map (\cadaLadron -> todosSeRebelanContra cadaLadron susRehenes) estosLadrones
+
+armarseCon :: Arma -> [Ladron] -> [Ladron]
+armarseCon estaArma estosLadrones = map (conseguirUnArma estaArma) estosLadrones
+-}
