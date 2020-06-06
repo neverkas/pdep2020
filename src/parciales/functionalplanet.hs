@@ -164,3 +164,5 @@ cualTieneMayorPuntaje mascotaA mascotaB
 sumarPuntajes :: Resultado -> Int
 sumarPuntajes (_, porEnergia, porHabilidad, porTernura) = ((+) porEnergia . (+) porHabilidad) porTernura
 
+-- Refactor del PUNTO 6/7
+-- "Pendiente.."
