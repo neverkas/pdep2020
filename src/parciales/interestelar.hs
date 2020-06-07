@@ -23,9 +23,9 @@ coordenadas planeta = map (\coordenada -> (coordenada.posicion) planeta) [coordX
 -- otra manera sin map
 --coordenadas' planeta = [(coordX.posicion) planeta, (coordY.posicion) planeta, (coordZ.posicion) planeta]
 
-distanciaEntre :: Planeta -> Planeta -> Distancia
+distanciaEntre :: Planeta -> Planeta -> Int
 distanciaEntre unPlaneta otroPlaneta =
-  (sumarySacarRaiz.operarCoordenadasEntre unPlaneta) otroPlaneta
+  (round.sumarySacarRaiz.operarCoordenadasEntre unPlaneta) otroPlaneta
 
 operarCoordenadasEntre :: Planeta -> Planeta -> [Float]
 operarCoordenadasEntre unPlaneta otroPlaneta=
@@ -37,8 +37,8 @@ operarCoordenadas unNumero otroNumero = (unNumero - otroNumero)^2
 sumarySacarRaiz :: [Float] -> Float
 sumarySacarRaiz coordenadas = (sqrt.sum) coordenadas
 
-type Viaje = Planeta -> Planeta -> Float
-tiempoEnViajarA :: Float -> Viaje
+type Viaje = Planeta -> Planeta -> Int
+tiempoEnViajarA :: Int -> Viaje
 tiempoEnViajarA velocidad origen destino = (flip div velocidad.distanciaEntre origen) destino
 
 --
@@ -60,35 +60,32 @@ aniosIndicados planeta astronauta = (tiempo planeta.edad) astronauta
 cambiarEdad :: (Int->Int) -> Viajo
 cambiarEdad cuantosAnios (UnAstronauta nombre edad planeta) =
   UnAstronauta nombre (cuantosAnios edad) planeta
-{-
-pasarTiempoEn' :: Planeta -> Astronauta -> Astronauta
-pasarTiempoEn' unPlaneta = undefined
---  aumentarEdadEn (tiempo unPlaneta).edad
+-- es mejor pasarle una funcion que recibe una operacion (*,+,-,/) para generalizar y evita repiticion de codigo
+-- UnAstronauta nombre (edad+tiempo) planeta
 
-aumentarEdadEn :: Int -> Astronauta -> Astronauta
-aumentarEdadEn tiempo (UnAstronauta nombre edad planeta) =
-  UnAstronauta nombre (edad+tiempo) planeta
--}
 --
 -- # PUNTO 3
 --
-{-
 type Nave = Planeta -> Planeta -> Int
-type Tanques = Int
 
-naveVieja :: Tanques -> Nave
-naveVieja tanques
-  | tanques < 6 = tiempoEnViajarA 7
-  | otherwise = tiempoEnViajarA 10
+naveVieja :: Int -> Nave
+naveVieja cuantosTanques
+  | cuantosTanques < 6 = tiempoEnViajarA 10
+  | otherwise = tiempoEnViajarA 7
 
 naveFuturista :: Nave
-naveFuturista = tiempoEnViajarA 1 -- quizas esta mal (?) el tiempo es despreciable
+naveFuturista _ _ = 0
+-- no era necesario calcular nada..
+-- naveFuturista = tiempoEnViajarA 1
 
---viajar :: Astronauta -> Nave -> Astronauta
-viajar astronauta origen destino= undefined
---  flip aumentarEdadEn astronauta
+viajarEn :: Nave -> Planeta -> Planeta -> Viajo
+viajarEn nave origen destino astronauta =
+  (cambiarPlanetaA destino.cambiarEdad ((+) tiempoDeViaje)) astronauta
+  where tiempoDeViaje = nave origen destino
+
+cambiarPlanetaA :: Planeta -> Astronauta -> Astronauta
+cambiarPlanetaA nuevoPlaneta (UnAstronauta nombre edad planeta) = UnAstronauta nombre edad nuevoPlaneta
 
 --
 -- # Punto 4
 --
--}

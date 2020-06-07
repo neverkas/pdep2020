@@ -1,3 +1,5 @@
+module Clase4Ejercicio4 where
+
 {-
 Clase 4 - Ejercicio 4
 Mumuki Ejercicio 18: Iniciales

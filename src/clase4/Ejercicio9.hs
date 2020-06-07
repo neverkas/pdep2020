@@ -1,6 +1,6 @@
+module Clase4Ejercicio9 where
 -- https://mumuki.io/nym/exercises/1788-programacion-funcional-dominar-el-mundo-con-nada-maximosegun
 
-module Clase4 where
 
 --mayorSegun f a b = max (f a) (f b)
 mayorSegun :: Ord a => (a->a) -> a -> a -> a

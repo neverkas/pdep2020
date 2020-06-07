@@ -1,3 +1,5 @@
+module ParcialLambdaprop where
+
 type Barrio = String
 type Mail = String
 type Requisito = Depto -> Bool

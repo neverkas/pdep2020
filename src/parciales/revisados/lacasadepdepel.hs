@@ -17,22 +17,36 @@ data Rehen = UnRehen{
   planes :: [PlanParaRebelarse]
 }deriving(Show)
 
+type Arma = Rehen -> Rehen
+pistola :: Int -> Arma
+pistola suCalibre unRehen =
+  -- REVISAR..
+  (cambiarMiedoEn ((+) (3*cantidadDeLetrasDelNombre unRehen)).cambiarComplotEn ((-) (suCalibre*5))) unRehen
+-- te faltaban parentesis..
+-- (cambiarMiedoEn ((3*).cantidadDeLetrasDelNombre).cambiarComplotEn ((-).suCalibre*5)) unRehen
+-- no eran data, eran funciones... modificaban al rehen
+
+ametralladora :: Int -> Arma
+ametralladora cuantasBalas unRehen =
+  (cambiarComplotEn (divididoPor 2).cambiarMiedoEn (+cuantasBalas)) unRehen
+  -- estabas usando decimales, y.. deberia ser enteros (con div)
+  -- (cambiarComplotEn (*0.5).cambiarMiedoEn (+cuantasBalas)) unRehen
 -- type Arma = Pistola | Ametralladora
-data Arma = Pistola | Ametralladora deriving(Show)
-
-data Pistola = UnaPistola{
-  calibre :: Int
-}
-
-data Ametralladora = UnaAmetralladora{
-  balasRestantes :: Int
-}
+-- data Arma = Pistola | Ametralladora deriving(Show)
+-- data Pistola = UnaPistola{
+--   calibre :: Int
+-- }
+-- data Ametralladora = UnaAmetralladora{
+--   balasRestantes :: Int
+-- }
 
 tokio :: Ladron
 tokio = UnLadron{
   nombreDelLadron = "Tokio",
   habilidades = ["trabajo psicologico", "entrar en moto"],
-  armas = [Pistola 9, Pistola 9, Ametralladora 30]
+  armas = [pistola 9, pistola 9, ametralladora 30]
+  -- antes habias puesto q eran data, pero eran funciones..
+  -- armas = [Pistola 9, Pistola 9, Ametralladora 30]
 }
 
 profesor :: Ladron
@@ -81,10 +95,12 @@ conseguirUnArma estaArma (UnLadron nombre habilidades armas) =
 type Intimidacion = Ladron -> Rehen -> Rehen
 
 intimidarCon :: Intimidacion -> Ladron -> Rehen -> Rehen
-intimidarCon algunMetodo ladron rehen = (intimidarA rehen.algunMetodo) ladron
+intimidarCon algunMetodo ladron rehen = (algunMetodo ladron) rehen
+-- no era necesario llamar a otra funcion
+-- intimidarCon algunMetodo ladron rehen = (intimidarA rehen.algunMetodo) ladron
 
-intimidarA :: Intimidacion
-intimidarA unRehen elMetodoQueIntimida = elMetodoQueIntimida unRehen
+-- intimidarA :: Intimidacion
+-- intimidarA unRehen elMetodoQueIntimida = elMetodoQueIntimida unRehen
 
 dispararAlTecho :: Intimidacion
 dispararAlTecho ladron rehen = causarMiedoEn rehen
@@ -97,7 +113,9 @@ causarMiedoEn (UnRehen nombre complot miedo planes) = UnRehen nombre complot mie
 -- revisar si te sirve pattern matching
 hacerseElMalo :: Intimidacion
 hacerseElMalo esteLadron unRehen
-  | (seLlamaIgualA "Berlin".nombreDelLadron) esteLadron = (cambiarMiedoEn.(+) cuantasHabilidadesTiene esteLadron) unRehen
+  | (seLlamaIgualA "Berlin".nombreDelLadron) esteLadron = (cambiarMiedoEn (+ cuantasHabilidadesTiene esteLadron)) unRehen
+-- te faltaban encapsular con parentesis
+-- | (seLlamaIgualA "Berlin".nombreDelLadron) esteLadron = (cambiarMiedoEn.(+) cuantasHabilidadesTiene esteLadron) unRehen
   | (seLlamaIgualA "Rio".nombreDelLadron) esteLadron = cambiarComplotEn (+20) unRehen
   | otherwise = cambiarMiedoEn (+10) unRehen
 
@@ -118,7 +136,10 @@ calmarLasAguas :: Ladron -> [Rehen] -> [Rehen]
 calmarLasAguas unLadron variosRehenes = (tienenDeComplotMasDe 60 . map (dispararAlTecho unLadron)) variosRehenes
 
 tienenDeComplotMasDe :: Int -> [Rehen] -> [Rehen]
-tienenDeComplotMasDe cuantoTienen = filter (>cuantoTienen)
+tienenDeComplotMasDe cuantoTienen = filter ((>cuantoTienen).nivelDeComplot)
+-- te faltaba llamar a la funcion "nivelDeComplot" para comparar con "cuantoTienen"
+-- estabas comparando Rehen con un numero..
+-- tienenDeComplotMasDe cuantoTienen = filter (>cuantoTienen)
 
 -- # PUNTO 6
 
@@ -126,10 +147,12 @@ puedeEscaparseDeLaPolicia :: Ladron -> Bool
 puedeEscaparseDeLaPolicia esteLadron = (tieneUnaHabilidadQueEmpiezeCon "disfrazarse de".habilidades) esteLadron
 
 tieneUnaHabilidadQueEmpiezeCon :: Habilidad -> [Habilidad] -> Bool
-tieneUnaHabilidadQueEmpiezeCon comoEmpieza susHabilidades = elem (esIgualA comoEmpieza) susHabilidades
+tieneUnaHabilidadQueEmpiezeCon comoEmpieza susHabilidades = elem (comoEmpieza) susHabilidades
+-- recorda que el "elem" no es para comparar con ==, solo busca si un elemento esta en una lista...
+-- tieneUnaHabilidadQueEmpiezeCon comoEmpieza susHabilidades = elem (esIgualA comoEmpieza) susHabilidades
 
-esIgualA :: String -> String -> Bool
-esIgualA estoOtro = (==estoOtro)
+-- esIgualA :: String -> String -> Bool
+-- esIgualA estoOtro = (==estoOtro)
 
 -- # PUNTO 7
 
@@ -141,7 +164,7 @@ estoPintaMal variosLadrones variosRehenes =
         armasDeLosLadrones = cuantasArmasTienen variosLadrones
 
 promedioDe :: (Rehen->Int) -> [Rehen] -> Int
-promedioDe queCosa deEstosRehenes = (flip div cantidadDe deEstosRehenes.sumar queCosa) deEstosRehenes
+promedioDe queCosa deEstosRehenes = (flip div (cantidadDe deEstosRehenes).sumar queCosa) deEstosRehenes
 
 cantidadDe :: [Rehen] -> Int
 cantidadDe = length
@@ -187,7 +210,9 @@ esconderse deEsteLadron = (sacarleTantasArmasA deEsteLadron.divididoPor 3.cuanta
 -- # PUNTO 9
 ejecutarPlanValenciaPor :: [Ladron] -> [Rehen] -> Int
 ejecutarPlanValenciaPor estosLadrones susRehenes =
-  (escaparseConElDinero.armarseCon (UnaAmetralladora 45).seRebelanSusRehenes) estosLadrones
+   (escaparseConElDinero.armarseCon (ametralladora 45).seRebelanSusRehenes) estosLadrones
+  -- ametralladora no era un data, si no una funcion...
+  -- (escaparseConElDinero.armarseCon (UnaAmetralladora 45).seRebelanSusRehenes) estosLadrones
   where armarseCon estaArma = map (conseguirUnArma estaArma)
         escaparseConElDinero = (*1000000).cuantasArmasTienen
         seRebelanSusRehenes = map (\cadaLadron -> todosSeRebelanContra cadaLadron susRehenes)
@@ -208,11 +233,17 @@ armarseCon estaArma estosLadrones = map (conseguirUnArma estaArma) estosLadrones
 -- No, porque no terminaria de completar el numero de armas que tienen, por tanto no podria multiplicar 1000000
 
 -- PUNTO 11
+-- Correccion: Si puede ser, pero depende de las habilidades que use el rehen
 -- No, porque una de las habilidades de los rehenes es esconderse, y similar al anterior no terminaria de
 -- saber cuantas habilidades tiene para diviir por 3
 
 -- PUNTO 12
---funcion :: Num a1 => b -> (a->d) -> (b->(a->Bool)) -> h -> [a] ->
+
+funcion :: b -> (a -> [c]) -> (b->(a->Bool)) -> Int -> [a] -> Bool
+-- el str debia ser Int, el Ord no era necesario
+-- lista devolvia una funcion que tenia como entrada "a", osea el mismo tipo que [a]
+-- num, ibas bien tenia q ser una funcion que reciba "a", es decir el mismo tipo que [a] y debia devolver otro tipo [c]
+-- esto ultimo de [c] es porque.. "sum" opera con listas
 -- funcion :: Ord x => b -> a1 -> (b->(d->Bool)) -> x -> [a] -> Bool
--- funcion cond num lista str = (> str) . sum . map (length . num) . filter (lista cond)
+funcion cond num lista str = (> str) . sum . map (length . num) . filter (lista cond)
 

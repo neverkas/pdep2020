@@ -1,6 +1,8 @@
-module Minigolfito where
--- DATOS
+module ParcialMinigolfito where
 
+import Text.Show.Functions
+
+-- # DATOS
 bart = ("Bart","Homero",(25,60))
 todd = ("Todd","Ned",(15,80))
 rafa = ("Rafa","Gorgory",(10,1))

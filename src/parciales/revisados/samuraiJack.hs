@@ -35,23 +35,32 @@ mandarAlAnio anioFijado personaje = personaje{ anioPresente = anioFijado}
 meditar :: Transformacion
 --meditar personaje = personaje{ salud = salud personaje + (reducirAlaMitad.salud) personaje}
 --meditar personaje = aumentarSaludEn (0.5*salud personaje) $ personaje
-meditar = aumentarSaludEn (/2)
+--meditar = aumentarSaludEn (/2)
+-- para que quede mas generico se puede incrementar usando porcentajes, 1.5 equivale al 100%+50%
+meditar = cambiarSaludEn (*1.5)
 
-aumentarSaludEn :: (Float -> Float) -> Transformacion
-aumentarSaludEn cuantoAumenta (UnPersonaje nombre salud elementos anioPresente)=
-  UnPersonaje nombre ((salud+).cuantoAumenta $ salud)  elementos anioPresente
+cambiarSaludEn :: (Float -> Float) -> Transformacion
+cambiarSaludEn cuanto (UnPersonaje nombre salud elementos anioPresente) =
+  UnPersonaje nombre (cuanto salud) elementos anioPresente
+
+--aumentarSaludEn :: (Float -> Float) -> Transformacion
+--aumentarSaludEn cuantoAumenta (UnPersonaje nombre salud elementos anioPresente)=
+--  UnPersonaje nombre ((salud+).cuantoAumenta $ salud)  elementos anioPresente
 --reducirAlaMitad :: Float -> Float
 --reducirAlaMitad = (/2)
 
 type Danio = Float
-
 causarDanio :: Danio -> Transformacion
-causarDanio cuantoAfecta = reducirSaludEn (cuantoAfecta-)
+--causarDanio cuantoAfecta = reducirSaludEn (cuantoAfecta-)
+causarDanio cuantoAfecta = cambiarSaludEn (max 0.flip (-) cuantoAfecta)
+--no va a restar de manera correcta (-) 10 50 devuelve -40, en cambio flip (-) 10 50 devuelve 40, el danio es menor a la salud
+--causarDanio cuantoAfecta = reducirSaludEn (max 0.(-) cuantoAfecta)
+-- no explotas al maximo el paradigma (funciones, orden superior, aplicacion parcial, composicion,..)
 --causarDanio cantidadDanio personaje = personaje{ salud = (reducirSaludEn cantidadDanio.salud) personaje}
 
-reducirSaludEn :: (Float -> Float) -> Transformacion
-reducirSaludEn cuantoReduce (UnPersonaje nombre salud elementos anioPresente)=
-  UnPersonaje nombre (max 0 $ cuantoReduce salud)  elementos anioPresente
+-- reducirSaludEn :: (Float -> Float) -> Transformacion
+-- reducirSaludEn cuantoReduce (UnPersonaje nombre salud elementos anioPresente)=
+--   UnPersonaje nombre (max 0 $ cuantoReduce salud)  elementos anioPresente
 --reducirSaludEn danio salud = max 0 (salud - danio)
 --reducirSaludEn danio = max 0.((-) danio)
 
@@ -67,13 +76,11 @@ algunoEsTipo tipoElegido = any ((==) tipoElegido.tipo)
 
 danioQueProduce :: Personaje -> Elemento -> Float
 danioQueProduce personaje elemento =
+   ((salud personaje -).salud.ataque elemento) personaje
   --salud personaje - (salud.luegoDeAtaqueCon elemento) personaje
-
   -- De esta manera estas usando aun mas lo que es composicicion
+  -- la funcion "luegoDeAtaqueCon" era innecesaria, podias usar directo "ataque"
   --((salud personaje -).salud.luegoDeAtaqueCon elemento) personaje
-
-  -- en la funcion anterior "luegoDeAtaqueCon" era innecesaria, podias usar directo "ataque"
-    ((salud personaje -).salud.ataque elemento) personaje
 
 --luegoDeAtaqueCon :: Elemento -> Transformacion
 --luegoDeAtaqueCon elemento = ataque elemento
