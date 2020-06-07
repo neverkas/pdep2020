@@ -163,10 +163,26 @@ esUtilCon esteObstaculo esteTiro = condicion (esteObstaculo esteTiro)
 
 cuantosObstaculosSupera :: [Obstaculo] -> Tiro -> Int
 cuantosObstaculosSupera variosObstaculos esteTiro =
-  (contarCuantos.filter (esSuperadoPor esteTiro)) variosObstaculos
+  (contarCuantos.takeWhile (esSuperadoPor esteTiro)) variosObstaculos
+  --(contarCuantos.filter (esSuperadoPor esteTiro)) variosObstaculos
 
 esSuperadoPor :: Tiro -> Obstaculo -> Bool
 esSuperadoPor esteTiro unObstaculo = condicion (unObstaculo esteTiro)
 
 contarCuantos :: [a] -> Int
 contarCuantos deEstaLista = length deEstaLista
+
+paloMasUtil :: Jugador -> [Obstaculo] -> Palo
+paloMasUtil esteJugador variosObstaculos =
+  maximoSegun (cuantosSupera esteJugador variosObstaculos) palos
+--  foldl1 (cualSuperaMas esteJugador variosObstaculos) palos
+
+cuantosSupera :: Jugador -> [Obstaculo] -> Palo -> Int
+cuantosSupera jugador obstaculos = cuantosObstaculosSupera obstaculos.golpe jugador
+
+-- el enunciado ya te daba una funcion..
+-- cualSuperaMas :: Jugador -> [Obstaculo] -> Palo -> Palo -> Palo
+-- cualSuperaMas jugador obstaculos paloA paloB
+--   | cuantosSupera paloA > cuantosSupera paloB = paloA
+--   | otherwise = paloB
+--   where cuantosSupera = cuantosObstaculosSupera obstaculos.golpe jugador
