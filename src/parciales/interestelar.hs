@@ -14,37 +14,32 @@ nombre (UnAstronauta n _ _) = n
 edad (UnAstronauta _ e _) = e
 planeta (UnAstronauta _ _ p) = p
 
---
 -- # PUNTO 1
---
 type Distancia = Float
 type Coordenadas = [Float]
 
 coordenadas :: Planeta -> Coordenadas
-coordenadas planeta = map (\coordenada -> coordenada.posicion $ planeta) [coordX, coordY, coordZ]
+coordenadas planeta = map (\coordenada -> (coordenada.posicion) planeta) [coordX, coordY, coordZ]
+-- otra manera sin map
+--coordenadas' planeta = [(coordX.posicion) planeta, (coordY.posicion) planeta, (coordZ.posicion) planeta]
 
 distanciaEntre :: Planeta -> Planeta -> Distancia
-distanciaEntre unPlaneta =
-  (calcularCadaPosicicion $ coordenadas unPlaneta) . coordenadas
+distanciaEntre unPlaneta otroPlaneta =
+  (sumarySacarRaiz.operarCoordenadasEntre unPlaneta) otroPlaneta
 
-calcularCadaPosicicion :: Coordenadas -> Coordenadas -> Float
-calcularCadaPosicicion coordenadasA = sum . zipWith (elModuloEntre) coordenadasA
+operarCoordenadasEntre :: Planeta -> Planeta -> [Float]
+operarCoordenadasEntre unPlaneta otroPlaneta=
+  zipWith (operarCoordenadas) (coordenadas unPlaneta) (coordenadas otroPlaneta)
 
-elModuloEntre :: Float -> Float -> Float
-elModuloEntre unNumero otroNumero =
-  (^2) $ unNumero - otroNumero
+operarCoordenadas :: Float -> Float -> Float
+operarCoordenadas unNumero otroNumero = (unNumero - otroNumero)^2
 
-laRaizDe :: Float -> Float
-laRaizDe = sqrt
+sumarySacarRaiz :: [Float] -> Float
+sumarySacarRaiz coordenadas = (sqrt.sum) coordenadas
 
-type Velocidad = Float
-type Tiempo = Float
-tiempoEnViajarA :: Planeta -> Planeta -> Velocidad -> Tiempo
-tiempoEnViajarA desde hasta =
-  flip (/) (distanciaEntre desde hasta)
-  --distanciaEntre desde hasta `div`
--- Obs: NO uso div porque tira error si no es entero
-
+type Viaje = Planeta -> Planeta -> Float
+tiempoEnViajarA :: Float -> Viaje
+tiempoEnViajarA velocidad origen destino = (flip div velocidad.distanciaEntre origen) destino
 
 --
 --  # PUNTO 2
@@ -65,19 +60,21 @@ aumentarEdadEn tiempo (UnAstronauta nombre edad planeta) =
 -- # PUNTO 3
 --
 
-type Nave = Planeta -> Planeta -> Tiempo
+type Nave = Planeta -> Planeta -> Int
 type Tanques = Int
 
 naveVieja :: Tanques -> Nave
 naveVieja tanques
-  | tanques < 6 = viajarA 7
-  | otherwise = viajarA 10
+  | tanques < 6 = tiempoEnViajarA 7
+  | otherwise = tiempoEnViajarA 10
 
-viajarA :: Velocidad -> Nave
-viajarA unaVelocidad origen =
-  (*) unaVelocidad . distanciaEntre origen
+naveFuturista :: Nave
+naveFuturista = tiempoEnViajarA 1 -- quizas esta mal (?) el tiempo es despreciable
 
-viajarA' :: Velocidad -> Nave
-viajarA' unaVelocidad origen destino =
-  unaVelocidad * distanciaEntre origen destino
+--viajar :: Astronauta -> Nave -> Astronauta
+viajar astronauta origen destino= undefined
+--  flip aumentarEdadEn astronauta
 
+--
+-- # Punto 4
+--
