@@ -44,10 +44,23 @@ tiempoEnViajarA velocidad origen destino = (flip div velocidad.distanciaEntre or
 --
 --  # PUNTO 2
 --
-pasarTiempoEn :: Planeta -> Astronauta -> Astronauta
-pasarTiempoEn unPlaneta astronauta =
-  aumentarEdadEn (tiempo unPlaneta $ edad astronauta) astronauta
+type Viajo = Astronauta->Astronauta
 
+pasarTiempoEn :: Planeta -> Viajo
+pasarTiempoEn unPlaneta astronauta = cambiarEdad ((+) (aniosIndicados unPlaneta astronauta)) astronauta
+-- esto rompia porque... tiempo de planeta pedia tambien la edad del astronauta
+-- pasarTiempoEn unPlaneta astronauta = (cambiarEdad ((+) tiempo unPlaneta)) astronauta
+--  aumentarEdadEn (tiempo unPlaneta $ edad astronauta) astronauta
+
+aniosIndicados :: Planeta -> Astronauta -> Int
+aniosIndicados planeta astronauta = (tiempo planeta.edad) astronauta
+-- esta otra forma no usa composicion
+--aniosIndicados planeta astronauta = tiempo planeta (edad astronauta)
+
+cambiarEdad :: (Int->Int) -> Viajo
+cambiarEdad cuantosAnios (UnAstronauta nombre edad planeta) =
+  UnAstronauta nombre (cuantosAnios edad) planeta
+{-
 pasarTiempoEn' :: Planeta -> Astronauta -> Astronauta
 pasarTiempoEn' unPlaneta = undefined
 --  aumentarEdadEn (tiempo unPlaneta).edad
@@ -55,11 +68,11 @@ pasarTiempoEn' unPlaneta = undefined
 aumentarEdadEn :: Int -> Astronauta -> Astronauta
 aumentarEdadEn tiempo (UnAstronauta nombre edad planeta) =
   UnAstronauta nombre (edad+tiempo) planeta
-
+-}
 --
 -- # PUNTO 3
 --
-
+{-
 type Nave = Planeta -> Planeta -> Int
 type Tanques = Int
 
@@ -78,3 +91,4 @@ viajar astronauta origen destino= undefined
 --
 -- # Punto 4
 --
+-}
