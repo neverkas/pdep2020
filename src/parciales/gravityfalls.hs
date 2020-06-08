@@ -96,10 +96,11 @@ experienciaPorEnfrentamientosSucesivosA criaturas persona =
 
 enfrentarseSucesivamenteA :: [Criatura] -> Enfrentamiento
 enfrentarseSucesivamenteA criaturas persona =
-  -- Correccion a la frase de abajo, "LO HACE BIEN" (te confundiste por el ej. bonus de minigolfito 2020)
+  -- Correccion a la frase de abajo, "parece funcionar ok" (quizas te confundiste por el ej. bonus de minigolfito 2020)
   -- En realidad no hace de forma sucesiva, la persona no cambia, modifica la original, deberia ir modificandola
   -- Ej. 1er ataque gana 10, a esa otra modificarle y que gane 20, ...
    foldr (enfrentarseA) persona criaturas
+  -- foldl? "a menos que haya alguna aclaración particular sobre el orden en el que haya que foldear, ambas valen"
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -142,3 +143,30 @@ simulacionContraFantasmasE = experienciaPorEnfrentamientosSucesivosA [fantasma] 
 -- Unico caso en que si puede desaparecer al fantasma
 simulacionContraFantasmasF = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 10 ["disfraz oveja"] 0)
 
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+--
+-- # Parte 2
+--
+
+-- # Punto 1
+
+-- > zipWithIf (*) even [10..50] [1..7]
+-- [1,20,3,44,5,72,7] ← porque [1, 2*10, 3, 4*11, 5, 6*12, 7]
+zipWithIf :: (a -> b -> b) -> (b -> Bool) -> [a] -> [b] -> [b]
+-- Caso base (expresion que corta el caso/funcion/expresion recursiva)
+-- Si no hay mas elementos en la primera lista, no tiene sentido avanzar
+zipWithIf operacion condicion [] _ = []
+-- mientras haya elementos en la primera lista, pero no haya en la segunda no tiene sentido avanzar
+zipWithIf operacion condicion (cabeza:cola) [] = []
+-- Ojo..! Esto seria un patron innecesario
+--zipWithIf operacion condicion [] [] = []
+zipWithIf operacion condicion (listaAcabeza:listaAcola) (listaBcabeza:listaBcola)
+-- Ojo..! esto fallaria porque.. el tipado pide (a->b->b), no (b->a->b)
+-- | condicion listaBcabeza = (operacion listaBcabeza listaAcabeza) : zipWithIf operacion condicion listaAcola listaBcola
+  | condicion listaBcabeza = (operacion listaAcabeza listaBcabeza) : zipWithIf operacion condicion listaAcola listaBcola
+  | otherwise = listaBcabeza : zipWithIf operacion condicion (listaAcabeza:listaAcola) listaBcola
+
+simulacionZipWithIf = zipWithIf (*) even [10..50] [1..7]
+
+-- # Punto 2
