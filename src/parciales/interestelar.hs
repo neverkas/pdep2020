@@ -102,6 +102,24 @@ rescateA astronauta tripulacion nave destino =
    where astronautaVarado = astronautaVaradoEn destino nave astronauta
          viajarADestino = viajeDeTripulacionEn nave destino
 
+-- era una posible idea, pero.. el planeta donde esta varado esta dentro de los datos del astronauta (planeta)
+--type RescatistaVarado = (Astronauta, Planeta)
+--losRescatistasRescatadosSeran :: [Astronauta] -> Nave -> [RescatistaVarado] -> [String]
+
+losRescatistasRescatadosSeran :: [Astronauta] -> Nave -> [Astronauta] -> [String]
+losRescatistasRescatadosSeran rescatistas nave rescatistasVarados =
+  (susNombres.sonRescatadosPor rescatistas nave) rescatistasVarados
+
+sonRescatadosPor :: [Astronauta] -> Nave -> [Astronauta] -> [Astronauta]
+sonRescatadosPor rescatistas nave = filter (puedeSerRescatadoPor rescatistas nave)
+
+puedeSerRescatadoPor :: [Astronauta] -> Nave -> Astronauta -> Bool
+puedeSerRescatadoPor tripulacion nave astronauta =
+  ((<90).edad) astronauta && any ((<90).edad) (rescateA astronauta tripulacion nave (planeta astronauta))
+
+susNombres :: [Astronauta] -> [String]
+susNombres = map (nombre)
+
 incluirAlaTripulacionA :: Astronauta -> [Astronauta] -> [Astronauta]
 incluirAlaTripulacionA astronauta tripulacion = astronauta : tripulacion
 
