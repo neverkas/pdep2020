@@ -133,6 +133,15 @@ viajeDeTripulacionEn nave destino = map (viajarEn nave destino)
 viajeDeRescateDeRegresoEn :: Nave -> [Astronauta] -> [Astronauta]
 viajeDeRescateDeRegresoEn nave = map (\tripulante -> viajarEn nave (planeta tripulante) tripulante)
 
+-- # PUNTO 5
+f :: (Ord b, Num e)   => (b -> a -> b)   -> b -> (e -> a-> Bool) -> [a] -> Bool
+-- f :: (Ord b, Ord c)   => (b -> a -> c)   -> b -> (Int -> a-> Bool) -> [a] -> Bool
+-- 1. en el parametro c, recibia un 'e' del tipo Num en vez de Int
+-- 2. en el parametro a, debia recibir y devoler un b para que sea del mismo tipo al compararlo en (> b)
+
+f a b c = any ((> b).a b).filter (c 10)
+
+
 -- -----------------------------------------------------------------------------------------------------------
 
 
