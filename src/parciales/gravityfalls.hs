@@ -170,3 +170,33 @@ zipWithIf operacion condicion (listaAcabeza:listaAcola) (listaBcabeza:listaBcola
 simulacionZipWithIf = zipWithIf (*) even [10..50] [1..7]
 
 -- # Punto 2
+
+-- abecedarioDesde 'y' debería retornar 'y':'z':['a' .. 'x'].
+
+type Abecedario = String
+type Letra = Char
+type Distancia = Int
+
+abecedario :: Abecedario
+abecedario = ['a'..'z']
+
+abecedarioDesde :: Letra -> Abecedario
+-- alternativa al filter, seria usando takeWhile para (<letra) y dropWhile para (>letra)
+abecedarioDesde letra = abecedarioSegunCriterio (>=letra) ++ abecedarioSegunCriterio (<letra)
+
+abecedarioSegunCriterio :: (Letra->Bool) -> Abecedario
+abecedarioSegunCriterio esteCriterio = filter (esteCriterio) abecedario
+
+-- abc empezaria por letraClave
+desencriptarLetra :: Letra -> Letra -> Letra
+desencriptarLetra letraClave letraDesencriptar =
+  (letraConDistanciaA letraDesencriptar.distanciaEntreLetras letraClave) letraDesencriptar
+  -- de esta manera era dificil usar composicion
+  --letraConDistanciaA (distanciaEntreLetras letraClave letraDesencriptar) letraDesencriptar
+
+distanciaEntreLetras :: Letra -> Letra -> Distancia
+distanciaEntreLetras letraDesde letraHasta = (length.takeWhile (/=letraHasta).abecedarioDesde) letraDesde
+
+--letraConDistanciaA :: Distancia -> Letra -> Letra
+letraConDistanciaA :: Letra -> Distancia -> Letra
+letraConDistanciaA unaLetra unaDistancia = (last.take unaDistancia.abecedarioDesde) unaLetra
