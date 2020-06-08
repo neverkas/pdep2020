@@ -153,12 +153,15 @@ simulacionContraFantasmasF = experienciaPorEnfrentamientosSucesivosA [fantasma] 
 
 -- > zipWithIf (*) even [10..50] [1..7]
 -- [1,20,3,44,5,72,7] ← porque [1, 2*10, 3, 4*11, 5, 6*12, 7]
+
+-- Pendiente por revisar "Casos de base"
 zipWithIf :: (a -> b -> b) -> (b -> Bool) -> [a] -> [b] -> [b]
 -- Caso base (expresion que corta el caso/funcion/expresion recursiva)
+zipWithIf _ _ [x] _ = []
 -- Si no hay mas elementos en la primera lista, no tiene sentido avanzar
 zipWithIf operacion condicion [] _ = []
 -- mientras haya elementos en la primera lista, pero no haya en la segunda no tiene sentido avanzar
-zipWithIf operacion condicion (cabeza:cola) [] = []
+zipWithIf _ _ (cabeza:cola) [] = []
 -- Ojo..! Esto seria un patron innecesario
 --zipWithIf operacion condicion [] [] = []
 zipWithIf operacion condicion (listaAcabeza:listaAcola) (listaBcabeza:listaBcola)
@@ -173,6 +176,8 @@ simulacionZipWithIf = zipWithIf (*) even [10..50] [1..7]
 
 -- abecedarioDesde 'y' debería retornar 'y':'z':['a' .. 'x'].
 
+type DesencriptacionTexto = String->String
+type DesencriptacionLetra = Char->Char
 type Abecedario = String
 type Letra = Char
 type Distancia = Int
@@ -188,7 +193,8 @@ abecedarioSegunCriterio :: (Letra->Bool) -> Abecedario
 abecedarioSegunCriterio esteCriterio = filter (esteCriterio) abecedario
 
 -- abc empezaria por letraClave
-desencriptarLetra :: Letra -> Letra -> Letra
+--  zipWithIf desencriptarLetra perteneceAlAbecedario abecedario textoEncriptado
+desencriptarLetra :: Letra -> DesencriptacionLetra
 desencriptarLetra letraClave letraDesencriptar =
   (letraConDistanciaA letraDesencriptar.distanciaEntreLetras letraClave) letraDesencriptar
   -- de esta manera era dificil usar composicion
@@ -200,3 +206,11 @@ distanciaEntreLetras letraDesde letraHasta = (length.takeWhile (/=letraHasta).ab
 --letraConDistanciaA :: Distancia -> Letra -> Letra
 letraConDistanciaA :: Letra -> Distancia -> Letra
 letraConDistanciaA unaLetra unaDistancia = (last.take unaDistancia.abecedarioDesde) unaLetra
+
+-- Pendiente por revisar..
+cesar :: Letra -> DesencriptacionTexto
+cesar letraClave textoEncriptado =
+ zipWithIf desencriptarLetra perteneceAlAbecedario (abecedarioDesde letraClave) textoEncriptado
+
+perteneceAlAbecedario :: Char -> Bool
+perteneceAlAbecedario letra = elem letra ['a'..'z']
