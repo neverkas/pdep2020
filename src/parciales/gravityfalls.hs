@@ -84,6 +84,8 @@ enfrentarseA criatura persona
 ganarExperiencia :: (Int->Int) -> Enfrentamiento
 ganarExperiencia cuantoCambiar (UnaPersona edad items experiencia) =
   UnaPersona edad items (cuantoCambiar experiencia)
+-- alternativa usando "azucar sintatico"
+ganarExperiencia' cuantoCambiar persona = persona{ experiencia = (cuantoCambiar.experiencia) persona }
 
 --
 -- # Punto 3
@@ -94,14 +96,10 @@ experienciaPorEnfrentamientosSucesivosA criaturas persona =
 
 enfrentarseSucesivamenteA :: [Criatura] -> Enfrentamiento
 enfrentarseSucesivamenteA criaturas persona =
+  -- Correccion a la frase de abajo, "LO HACE BIEN" (te confundiste por el ej. bonus de minigolfito 2020)
   -- En realidad no hace de forma sucesiva, la persona no cambia, modifica la original, deberia ir modificandola
   -- Ej. 1er ataque gana 10, a esa otra modificarle y que gane 20, ...
    foldr (enfrentarseA) persona criaturas
-  --( takeWhile () .  foldr (intentarVencer persona) [persona]) criaturas
-
--- intentarVencer :: Persona -> Criatura -> [Persona] -> Persona
--- intentarVencer personaOriginal criatura cambiosPersona =
---   enfrentarseA criatura personaOriginal
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -126,19 +124,21 @@ simulacionEnfrentamiento =
   experienciaPorEnfrentamientosSucesivosA [siempreDetras, grupoGnomos, fantasma, fantasma'] carlitos
 
 -- No puede desaparecer a los gnomos (Experiencia +1)
-simulacionContraGnomos = experienciaPorEnfrentamientosSucesivosA [grupoGnomos] (UnaPersona 15 [] 0)
+simulacionContraGnomosA = experienciaPorEnfrentamientosSucesivosA [gnomos 10] (UnaPersona 15 [] 0)
+-- No puede desaparecer a los gnomos (Experiencia +10)
+simulacionContraGnomosB = experienciaPorEnfrentamientosSucesivosA (replicate 10 (gnomos 10)) (UnaPersona 15 [] 0)
 -- Si puede desaparecer a los gnomos (Experiencia 2^(cantidad gnomos))
-simulacionContraGnomos' = experienciaPorEnfrentamientosSucesivosA [grupoGnomos] (UnaPersona 15 ["soplador de hojas"] 0)
+simulacionContraGnomosC = experienciaPorEnfrentamientosSucesivosA [gnomos 2] (UnaPersona 15 ["soplador de hojas"] 0)
 
 -- Casos en que no podra desaparecer al fantasma
-simulacionContraFantasmasB = experienciaPorEnfrentamientosSucesivosA [fantasma']  (UnaPersona 15 [] 0)
+simulacionContraFantasmasA = experienciaPorEnfrentamientosSucesivosA [fantasma']  (UnaPersona 15 [] 0)
 -- Unico caso en que si puede desaparecer al fantasma
-simulacionContraFantasmasB''' = experienciaPorEnfrentamientosSucesivosA [fantasma']  (UnaPersona 10 [] 100)
+simulacionContraFantasmasB = experienciaPorEnfrentamientosSucesivosA [fantasma']  (UnaPersona 10 [] 100)
 
 -- Casos en que no podra desaparecer al fantasma
-simulacionContraFantasmasA = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 15 [] 0)
-simulacionContraFantasmasA' = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 10 [] 0)
-simulacionContraFantasmasA'' = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 15 ["disfraz oveja"] 0)
+simulacionContraFantasmasC = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 15 [] 0)
+simulacionContraFantasmasD = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 10 [] 0)
+simulacionContraFantasmasE = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 15 ["disfraz oveja"] 0)
 -- Unico caso en que si puede desaparecer al fantasma
-simulacionContraFantasmasA''' = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 10 ["disfraz oveja"] 0)
+simulacionContraFantasmasF = experienciaPorEnfrentamientosSucesivosA [fantasma]  (UnaPersona 10 ["disfraz oveja"] 0)
 
