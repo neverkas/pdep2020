@@ -20,7 +20,6 @@ edad (suEdad, _, _) = suEdad
 peso (_, suPeso, _) = suPeso
 tonificacion (_,_,suTonificacion) = suTonificacion
 
-
 -- (edad, peso, tonificacion)
 -- Si no agregas el tipo a ambos, devuelve un error entre Int e Integer
 pancho :: Persona
@@ -99,3 +98,39 @@ montania inclinacion minutos persona =
 --
 -- # Punto 4
 --
+
+type Nombre = String
+type Duracion = Int
+type Rutina = (Nombre, Duracion, [Ejercicio])
+
+-- Resolucion con Foldl
+luegoDeHacerRutina :: Rutina -> Persona -> Persona
+luegoDeHacerRutina (nombre, duracion, ejercicios) persona =
+  foldl (hacerEjercicio duracion) persona ejercicios
+
+hacerEjercicio :: Minutos -> Persona -> Ejercicio -> Persona
+hacerEjercicio minutos persona ejercicio = ejercicio minutos persona
+
+-- Resolucion con Recursividad
+luegoDeHacerRutina' :: Rutina -> Persona -> Persona
+luegoDeHacerRutina' (_, _, []) persona = persona
+luegoDeHacerRutina' (nombre, duracion, (ejercicio1:ejerciciosSiguientes)) persona
+  | aunQuedanEjercicios = luegoDeHacerRutina' (nombre, duracion, ejerciciosSiguientes) (ejercicio1 duracion persona)
+  | otherwise = persona
+  where aunQuedanEjercicios = ((>0).length) ejerciciosSiguientes
+
+--
+-- # Simulacion de codigo
+--
+
+simulacionCaminata = caminata 40 pancho
+simulacionCinta = entrenamientoEnCinta 40 pancho
+simulacionPesas = pesas 50 15 pancho
+simulacionColina = colina 5 40 pancho
+simulacionMontania = montania 5 40 pancho
+
+simulacionRutina =
+  luegoDeHacerRutina ("pancho", 5, [caminata, entrenamientoEnCinta , pesas 5, colina 10]) pancho
+
+simulacionRutina' =
+  luegoDeHacerRutina' ("pancho", 10, [caminata, entrenamientoEnCinta , pesas 5, colina 10]) pancho
