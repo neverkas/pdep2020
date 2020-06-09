@@ -101,23 +101,30 @@ montania inclinacion minutos persona =
 
 type Nombre = String
 type Duracion = Int
+--type Rutina = (Nombre, Duracion, [Ejercicio])
 type Rutina = (Nombre, Duracion, [Ejercicio])
 
 -- Resolucion con Foldl
 luegoDeHacerRutina :: Rutina -> Persona -> Persona
-luegoDeHacerRutina (nombre, duracion, ejercicios) persona =
-  foldl (hacerEjercicio duracion) persona ejercicios
+luegoDeHacerRutina (nombre, duracion, ejercicios) estaPersona =
+  foldr (hacerEjercicio duracion) estaPersona ejercicios
 
-hacerEjercicio :: Minutos -> Persona -> Ejercicio -> Persona
-hacerEjercicio minutos persona ejercicio = ejercicio minutos persona
+hacerEjercicio :: Minutos -> Ejercicio -> Persona -> Persona
+hacerEjercicio minutos ejercicio persona= ejercicio minutos persona
 
 -- Resolucion con Recursividad
+-- "Pendiente a Revisar" (los valores arrojados no son iguales al fold)
 luegoDeHacerRutina' :: Rutina -> Persona -> Persona
 luegoDeHacerRutina' (_, _, []) persona = persona
 luegoDeHacerRutina' (nombre, duracion, (ejercicio1:ejerciciosSiguientes)) persona
   | aunQuedanEjercicios = luegoDeHacerRutina' (nombre, duracion, ejerciciosSiguientes) (ejercicio1 duracion persona)
   | otherwise = persona
   where aunQuedanEjercicios = ((>0).length) ejerciciosSiguientes
+
+-- Simulaciones
+simularRutina = ("rutina militar", 60, [caminata, entrenamientoEnCinta, pesas 50, colina 5]) 
+simularEntrenamiento = luegoDeHacerRutina simularRutina pancho
+simularEntrenamiento' = luegoDeHacerRutina' simularRutina pancho
 
 type Kilos = Int
 type ResumenRutina = (String, Kilos, Tonificacion)
@@ -133,7 +140,16 @@ kilosPerdidos :: Rutina -> Persona -> Int
 kilosPerdidos rutina persona = (peso persona) - (peso.luegoDeHacerRutina rutina) persona
 
 tonificacionGanada :: Rutina -> Persona -> Int
-tonificacionGanada rutina persona = (tonificacion persona) - (tonificacion.luegoDeHacerRutina rutina) persona
+tonificacionGanada rutina persona = abs $ (tonificacion persona) - (tonificacion.luegoDeHacerRutina rutina) persona
+-- Con abs evito el problema de valores negativos, porque una persona puede no tener tonificacion
+-- por tanto si gana 50 y tenia 0, te devolveria -50 como valor negativo
+-- Una alternativa seria usando max y min para restarle al mayor valor el menor
+-- Otra alternativa seria usando guardas con el concepto anterior de max y min
+
+--
+-- # Simulaciones
+--
+simularResumenDeUnaRutina = resumenDeUnaRutina simularRutina pancho
 
 --
 -- # Punto 5
@@ -156,8 +172,7 @@ simulacionPesas = pesas 50 15 pancho
 simulacionColina = colina 5 40 pancho
 simulacionMontania = montania 5 40 pancho
 
-simulacionRutina =
-  luegoDeHacerRutina ("pancho", 5, [caminata, entrenamientoEnCinta , pesas 5, colina 10]) pancho
+--simulacionRutina =  luegoDeHacerRutina ("pancho", 5, [caminata, entrenamientoEnCinta , pesas 5, colina 10]) pancho
 
 simulacionRutina' =
   luegoDeHacerRutina' ("pancho", 10, [caminata, entrenamientoEnCinta , pesas 5, colina 10]) pancho
