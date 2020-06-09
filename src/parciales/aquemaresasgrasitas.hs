@@ -113,13 +113,15 @@ hacerEjercicio :: Minutos -> Ejercicio -> Persona -> Persona
 hacerEjercicio minutos ejercicio persona= ejercicio minutos persona
 
 -- Resolucion con Recursividad
--- "Pendiente a Revisar" (los valores arrojados no son iguales al fold)
 luegoDeHacerRutina' :: Rutina -> Persona -> Persona
 luegoDeHacerRutina' (_, _, []) persona = persona
-luegoDeHacerRutina' (nombre, duracion, (ejercicio1:ejerciciosSiguientes)) persona
-  | aunQuedanEjercicios = luegoDeHacerRutina' (nombre, duracion, ejerciciosSiguientes) (ejercicio1 duracion persona)
-  | otherwise = persona
-  where aunQuedanEjercicios = ((>0).length) ejerciciosSiguientes
+luegoDeHacerRutina' (nombre, duracion, (ejercicio1:ejerciciosSiguientes)) persona =
+  luegoDeHacerRutina' (nombre, duracion, ejerciciosSiguientes) (ejercicio1 duracion persona)
+-- Ojo..! No era necesario usar guardas, la idea es usar todos los ejercicios
+-- Tu 1ra guarda usaba todos y la segunda hacia que perdiera ejercicios
+--  | aunQuedanEjercicios = luegoDeHacerRutina' (nombre, duracion, ejerciciosSiguientes) (ejercicio1 duracion persona)
+--  | otherwise = persona
+--  where aunQuedanEjercicios = ((>=1).length) ejerciciosSiguientes
 
 -- Simulaciones
 simularRutina = ("rutina militar", 60, [caminata, entrenamientoEnCinta, pesas 50, colina 5]) 
