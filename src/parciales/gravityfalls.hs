@@ -105,8 +105,9 @@ enfrentarseSucesivamenteA criaturas persona =
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 --
--- # Simulacion
+-- # Simulacion de codigo
 --
+
 grupoGnomos :: Criatura
 grupoGnomos = gnomos 10
 
@@ -157,13 +158,13 @@ simulacionContraFantasmasF = experienciaPorEnfrentamientosSucesivosA [fantasma] 
 -- Pendiente por revisar "Casos de base"
 zipWithIf :: (a -> b -> b) -> (b -> Bool) -> [a] -> [b] -> [b]
 -- Caso base (expresion que corta el caso/funcion/expresion recursiva)
-zipWithIf _ _ [x] _ = []
 -- Si no hay mas elementos en la primera lista, no tiene sentido avanzar
-zipWithIf operacion condicion [] _ = []
+zipWithIf _ _ [] _ = []
+-- Correccion: no interesaba el tercer parametro en este patron..
 -- mientras haya elementos en la primera lista, pero no haya en la segunda no tiene sentido avanzar
-zipWithIf _ _ (cabeza:cola) [] = []
+--zipWithIf _ _ (cabeza:cola) [] = []
 -- Ojo..! Esto seria un patron innecesario
---zipWithIf operacion condicion [] [] = []
+zipWithIf _ _ _ [] = []
 zipWithIf operacion condicion (listaAcabeza:listaAcola) (listaBcabeza:listaBcola)
 -- Ojo..! esto fallaria porque.. el tipado pide (a->b->b), no (b->a->b)
 -- | condicion listaBcabeza = (operacion listaBcabeza listaAcabeza) : zipWithIf operacion condicion listaAcola listaBcola
@@ -176,6 +177,7 @@ simulacionZipWithIf = zipWithIf (*) even [10..50] [1..7]
 
 -- abecedarioDesde 'y' debería retornar 'y':'z':['a' .. 'x'].
 
+type Criterio = Letra->Bool
 type DesencriptacionTexto = String->String
 type DesencriptacionLetra = Char->Char
 type Abecedario = String
@@ -189,11 +191,9 @@ abecedarioDesde :: Letra -> Abecedario
 -- alternativa al filter, seria usando takeWhile para (<letra) y dropWhile para (>letra)
 abecedarioDesde letra = abecedarioSegunCriterio (>=letra) ++ abecedarioSegunCriterio (<letra)
 
-abecedarioSegunCriterio :: (Letra->Bool) -> Abecedario
+abecedarioSegunCriterio :: Criterio -> Abecedario
 abecedarioSegunCriterio esteCriterio = filter (esteCriterio) abecedario
 
--- abc empezaria por letraClave
---  zipWithIf desencriptarLetra perteneceAlAbecedario abecedario textoEncriptado
 desencriptarLetra :: Letra -> DesencriptacionLetra
 desencriptarLetra letraClave letraDesencriptar =
   (letraConDistanciaA letraDesencriptar.distanciaEntreLetras letraClave) letraDesencriptar
@@ -201,16 +201,28 @@ desencriptarLetra letraClave letraDesencriptar =
   --letraConDistanciaA (distanciaEntreLetras letraClave letraDesencriptar) letraDesencriptar
 
 distanciaEntreLetras :: Letra -> Letra -> Distancia
+-- si usara filter, el resultado seria distinto
 distanciaEntreLetras letraDesde letraHasta = (length.takeWhile (/=letraHasta).abecedarioDesde) letraDesde
 
---letraConDistanciaA :: Distancia -> Letra -> Letra
 letraConDistanciaA :: Letra -> Distancia -> Letra
 letraConDistanciaA unaLetra unaDistancia = (last.take unaDistancia.abecedarioDesde) unaLetra
 
--- Pendiente por revisar..
 cesar :: Letra -> DesencriptacionTexto
 cesar letraClave textoEncriptado =
- zipWithIf desencriptarLetra perteneceAlAbecedario (abecedarioDesde letraClave) textoEncriptado
+  -- zipWithIf desencriptarLetra perteneceAlAbecedario (abecedarioDesde letraClave) textoEncriptado
+  zipWithIf desencriptarLetra perteneceAlAbecedario (repetirLetraSegun textoEncriptado letraClave) textoEncriptado
+
+posiblesDesencripcionesDe :: String -> [String]
+posiblesDesencripcionesDe textoEncriptado = map (\letra->cesar letra textoEncriptado) ['a'..'z']
+
+repetirLetraSegun :: String -> Letra -> String
+repetirLetraSegun texto letra = (flip replicate letra . length) texto
 
 perteneceAlAbecedario :: Char -> Bool
 perteneceAlAbecedario letra = elem letra ['a'..'z']
+
+--
+-- # Simulacion de codigo
+--
+simulacionDesencriptacion = posiblesDesencripcionesDe "jrzel zrfaxal!"
+
