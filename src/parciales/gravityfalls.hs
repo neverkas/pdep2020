@@ -196,16 +196,15 @@ abecedarioSegunCriterio esteCriterio = filter (esteCriterio) abecedario
 
 desencriptarLetra :: Letra -> DesencriptacionLetra
 desencriptarLetra letraClave letraDesencriptar =
-  (letraConDistanciaA letraDesencriptar.distanciaEntreLetras letraClave) letraDesencriptar
-  -- de esta manera era dificil usar composicion
-  --letraConDistanciaA (distanciaEntreLetras letraClave letraDesencriptar) letraDesencriptar
+  (!! posicionLetraAdesencriptar) (abecedarioDesde letraDesencriptar)
+  where posicionLetraAdesencriptar = max 0 (distanciaEntreLetras letraClave letraDesencriptar - 1)
+  -- uso max 0 para que si la distancia es 0, no quede un valor negativo (sino tira error)
+  -- le resto uno a la distancia, porque (!! 1) devuelve la segunda letra, en cambio (!! 0) la primera
 
 distanciaEntreLetras :: Letra -> Letra -> Distancia
+distanciaEntreLetras desde hasta = (length . takeWhile (/=hasta) . abecedarioDesde) desde
 -- si usara filter, el resultado seria distinto
-distanciaEntreLetras letraDesde letraHasta = (length.takeWhile (/=letraHasta).abecedarioDesde) letraDesde
-
-letraConDistanciaA :: Letra -> Distancia -> Letra
-letraConDistanciaA unaLetra unaDistancia = (last.take unaDistancia.abecedarioDesde) unaLetra
+--distanciaEntreLetras letraDesde letraHasta = (length.takeWhile (/=letraHasta).abecedarioDesde) letraDesde
 
 cesar :: Letra -> DesencriptacionTexto
 cesar letraClave textoEncriptado =

@@ -119,6 +119,33 @@ luegoDeHacerRutina' (nombre, duracion, (ejercicio1:ejerciciosSiguientes)) person
   | otherwise = persona
   where aunQuedanEjercicios = ((>0).length) ejerciciosSiguientes
 
+type Kilos = Int
+type ResumenRutina = (String, Kilos, Tonificacion)
+
+resumenDeUnaRutina :: Rutina -> Persona -> ResumenRutina
+resumenDeUnaRutina rutina persona =
+  (nombreDeRutina rutina,kilosPerdidos rutina persona, tonificacionGanada rutina persona)
+
+nombreDeRutina :: Rutina -> String
+nombreDeRutina (nombre, _, _) = nombre
+
+kilosPerdidos :: Rutina -> Persona -> Int
+kilosPerdidos rutina persona = (peso persona) - (peso.luegoDeHacerRutina rutina) persona
+
+tonificacionGanada :: Rutina -> Persona -> Int
+tonificacionGanada rutina persona = (tonificacion persona) - (tonificacion.luegoDeHacerRutina rutina) persona
+
+--
+-- # Punto 5
+-- "Pendiente a revisar"
+-- Deberia mostrarlo cuando paso por varias, rutinas hasta que en un momento esa persona sea saludable?
+-- O solo cuando es saludable ?
+
+resumenDeVariasRutinas :: [Rutina] ->  Persona -> [ResumenRutina]
+resumenDeVariasRutinas rutinas persona
+  | saludable persona = map (\rutina -> resumenDeUnaRutina rutina persona) rutinas
+  | otherwise = []
+
 --
 -- # Simulacion de codigo
 --
