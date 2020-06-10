@@ -228,5 +228,38 @@ perteneceAlAbecedario letra = elem letra ['a'..'z']
 --
 -- # Simulacion de codigo
 --
-simulacionDesencriptacion = posiblesDesencripcionesDe "jrzel zrfaxal!"
+simularDesencriptacion = posiblesDesencripcionesDe "jrzel zrfaxal!"
 
+--
+-- # Punto 3 BONUS!!
+--
+{-
+pdep pdep pd eppde
+wrpp, irhd to qjcgs!
+-------------------
+hola, todo el mundo!
+-}
+
+-- Te confundias porque.. querias usar el "cesar"!!! (._.)
+-- La idea es que agarra cada letra de ambos y desencripta en base a la palabraClaveAlineada, mientras
+-- que el caracter del texto encriptado pertenezca al alfabeto ['a'..'z'] sino avanza al siguiente
+vigenere :: String -> String -> String
+vigenere palabraClave textoEncriptado =
+  zipWithIf desencriptarLetra perteneceAlAbecedario palabraClaveAlineada textoEncriptado
+  where palabraClaveAlineada = alinearEntre palabraClave textoEncriptado
+-- tus intentos eran..
+-- zipWithIf cesar (null) palabraClave textoEncriptado
+-- map (\palabraEncriptada-> cesar (alinearEntre palabraClave textoEncriptado) palabraEncriptada) (words textoEncriptado)
+-- map (\letra-> cesar letra textoEncriptado) palabraClaveAlineada
+-- map (\letraClave->cesar letraClave textoEncriptado) palabraClave
+-- descifrarCon texto letra = map (cesar letra) texto
+
+simularVinegere = vigenere "pdep" "wrpp, irhd to qjcgs!"
+
+alinearEntre :: String -> String -> String
+alinearEntre palabraClave textoEncriptado =
+  take longitudTexto (concat.repeat $  palabraClave)
+  where longitudTexto = (length . filter (esLetra)) textoEncriptado
+
+esLetra :: Char -> Bool
+esLetra x = elem x ['a'..'z']
