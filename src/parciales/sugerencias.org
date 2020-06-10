@@ -134,7 +134,14 @@ quitarEnergia cantidad (UnVillano nombre energia) = UnVillano nombre (energia -c
       | otherwise = []
    #+END_SRC
 * Reduccion (fold)
-** No pasarle parametros #+BEGIN_SRC haskell usar :: [Gema] -> Gema usar listaDeGemas destinatario = foldr ($) destinatario $ listaDeGemas -- Asocia de derecha (cada funcion de la lista gemas) a izquierda (con destinatario) -- es como si dijera (gema destinatario) -- al agregar el $ te evitas errores #+END_SRC
+** No pasarle parametros
+#+BEGIN_SRC haskell
+ usar :: [Gema] -> Gema
+usar listaDeGemas destinatario = foldr ($) destinatario $ listaDeGemas
+ -- Asocia de derecha (cada funcion de la lista gemas) a izquierda (con destinatario)
+ -- es como si dijera (gema destinatario) -- al agregar el $ te evitas errores
+#+END_SRC
+
 * Abstracciones
 Generar abstracciones con pequeñas funciones
 #+BEGIN_SRC haskell
@@ -288,12 +295,15 @@ gemaMasPoderosaDe personaje (gema1:gema2:gemas)
 * Expresividad 
 * Funciones interesantes
   En algunos ejercicios te olvidabas de las siguientes funciones
-  + id: devuelve lo mismo que recibe, sin cambiar
-  + iterate
+  + **id**
+    1. devuelve lo mismo que recibe, sin cambiar
+    2. En caso de que tengas una funcion del tipo (algo->algo) en un data, pero al crear no le pasas ninguna funcion
+       (no le pasas ninguna funcion porque quizas no tiene)
+  + **iterate**
     1. Evitas crear funciones recursivas (no evitas usarlas, porque esta lo es)
     2. Repite una funcion (a->a) que recibe 1 argumento a
     3. Se puede detener la recursividad con (take, !!)
-  + replicate
+  + **replicate**
     1. Evitas crear funciones recursivas (no evitas usarlas, porque esta lo es)
     2. 
 
@@ -337,7 +347,6 @@ inventarTareas cuantas = replicate cuantas (UnaTarea "estudiar")
 
 #+NAME: Ejemplos Iterate
 #+BEGIN_SRC haskell
-noHacerNada = id
 data Personaje = UnPersonaje{ nombre::String, edad::Int }
 carlos = Personaje "carlos" 19
 
