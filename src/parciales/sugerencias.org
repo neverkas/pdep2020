@@ -1,0 +1,440 @@
+* Paginas de Referencia
+  - [[https://wiki.uqbar.org/wiki/articles/data--definiendo-nuestros-tipos-en-haskell.html][Definiendo tipos con Data]]
+* Fijar cotas inferiores/superiores
+** Fijar un minimo
+   Con **max** podes fijar un minimo valor
+   
+    Ej. > max 18 11
+        18
+** Fijar un maximo
+   Con la funcion **min**
+    Ej. > min 18 15
+        18
+* Composicion
+  Para componer varias funciones
+  1. Usar como formato (f1 a.f2 b.f3 c) n
+     Siendo a, b, c uno de los dos valores esperados por f1,f2,f3
+     y n el segundo valor que recibe cada funcion de derecha a izquierda
+   
+   #+NAME: Funciones con composicion
+#+BEGIN_SRC haskell
+--Con el operador -, es importante no usarlo como (-2) porque.. lo toma como numero -2 y no como una operacion..
+--al usar el flip, estamos haciendo esteNumero-2, caso contrario hace 2-esteNumero
+operacionLocaCon esteNumero = ((+1).flip (-)2.(*2)) esteNumero
+
+personalizarA personaje = (cambiarNombreA "pepe".cambiarEnergiaEn 10) personaje
+#+END_SRC
+
+#+NAME: Funciones sin composicion
+#+BEGIN_SRC haskell
+operacionLocaCon unNumero = 1+2-2*unNumero
+#+END_SRC
+   
+** Con Guardas
+   Utilizamos composicion y ademas modificamos al personaje
+   #+BEGIN_SRC haskell
+    debilitar :: Personaje -> Personaje
+    debilitar personaje
+     | (esMenorA 2.length.habilidades) personaje = personaje{ habilidades = [] }
+     | otherwise = personaje
+
+    esMenor :: Int -> Int -> Bool
+    esMenor n = (< n)
+   #+END_SRC
+* Funciones vs Data
+  - Puede presentarse que confundamos cuando usar funciones y modelar
+  - Si vamos a modificar un "algo" seguramente sea una funcion
+
+  Ej. Si te piden "queremos poder golpear un objeto y ver como cambia"
+  #+BEGIN_SRC
+  type Patada = Pelota->Pelota
+
+  patadaVoladora :: Int -> Patada
+  patadaVoladora fuerza pelota = (moverEnMetros (5*fuerza).desgastarEn (+10)) pelota
+  #+END_SRC
+* Modelado
+** Modelar los tipos con Data
+   #+BEGIN_SRC haskell
+     -- # Primera manera, sin especificar los nombres de las funciones     
+     -- Pero tenes que crear las funciones una por una, como con las tuplas pero sin comas
+     data Villano = UnVillano String Int
+     nombre (UnVillano suNombre _ ) = suNombre
+     edad (UnVillano _ suEdad) = suEdad
+
+     -- # Segunda manera
+      data Villano = Villano {
+       nombre :: String,
+       edad :: Int,
+       energia :: Int,
+       velocidad :: Int,
+       habilidades :: [String]
+      }
+   #+END_SRC
+** Modificar Atributos (cuando es Data)
+*** Mas corto, para atributos especificos con { }
+    #+BEGIN_SRC haskell
+    quitarEnergia :: Villano -> Villano
+    quitarEnergia unVillano = unVillano{ energia = 0 }
+    #+END_SRC
+
+    # Usando orden superior, delegamos en otra funcion para no usar solo {}
+    #+BEGIN_SRC haskell
+    debilitar :: Villano -> Villano
+    debilitar unVillano = removerHabilidades unVillano{ energia = 0 }
+
+    removerHabilidades unVillano = unVillano { habilidades = [] }
+    #+END_SRC
+
+    # Modificando varios atributos y utilizando guardas
+    #+BEGIN_SRC haskell
+    debilitar :: Int -> Villano -> Villano
+    debilitar cantFuerza unVillano = unVillano{
+     energia = energia - habilidadesImportantes personaje,
+     fuerza = fuerza unVillano - cantidadFuerza
+    }
+
+    habilidadesPeligrosas :: Personaje->Int
+    habilidadesPeligrosas personaje 
+  -- usamos composicion en la guarda y orden superior (al usar any)
+  -- le quitamos toda la energia
+      | (any esPeligrosa.habilidades) personaje = energia personaje
+      | otherwise = 10
+
+    #+END_SRC
+*** Mas largo, describiendo todo el data ( )
+    #+BEGIN_SRC haskell
+quitarEnergia :: Int -> Villano -> Villano
+quitarEnergia cantidad (UnVillano nombre energia) = UnVillano nombre (energia -cantidad)
+    #+END_SRC
+
+** Modelar con tuplas 
+   No es muy comun, pero seria otra alternativa
+* Filtrar listas
+  Recorda que el "distinto" en haskell es /= 
+  Ej. 4 /= 2
+** Filtrar los que sean distintos a
+   #+BEGIN_SRC haskell
+     data Planeta = Planeta{
+      numero :: Int,
+      habitantes :: [String],
+      heroes :: [Heroe]
+     }
+
+     data Heroe = Heroe{
+      nombre :: String,
+      fuerza :: Int,
+      codicia :: Int
+     }
+
+     -- se supone que pasamos al heroe corrrupto,
+     -- y ya no apareceria como heroes del planeta
+     corruptos :: Heroe -> Planeta -> [Heroe] 
+     corruptos heroeCorrupto planeta
+      |  ((>100).length.habitantes) planeta = filter (/= heroeCorrupto) (heroes planeta)
+      | otherwise = []
+   #+END_SRC
+* Reduccion (fold)
+** No pasarle parametros #+BEGIN_SRC haskell usar :: [Gema] -> Gema usar listaDeGemas destinatario = foldr ($) destinatario $ listaDeGemas -- Asocia de derecha (cada funcion de la lista gemas) a izquierda (con destinatario) -- es como si dijera (gema destinatario) -- al agregar el $ te evitas errores #+END_SRC
+* Abstracciones
+Generar abstracciones con pequeñas funciones
+#+BEGIN_SRC haskell
+blindaje :: Estrategia
+blindaje pais = (prestarPlata (pbi pais * 0.5) . reducirPuestos 500) pais
+
+pbi :: Pais -> Float
+pbi pais = ingresoPerCapita pais * fromIntegral (poblacionActiva pais) 
+
+poblacionActiva :: Pais -> Int 
+poblacionActiva pais = activosPrivado pais + activosPublico pais
+#+END_SRC
+
+#+BEGIN_SRC haskell
+paisesQueSafan :: [Pais] -> [Pais]
+-- usando la funcion lamba
+paisesQueSafan = filter (\pais -> elem "Petroleo" $ recursos pais)
+-- usando aplicacion parcial y composicion 
+paisesQueSafan' = filter $ elem "Petroleo" . recursos
+
+deudaAFavor :: [Pais] -> Int
+deudaAFavor = sum.map (deuda)
+-- usando fold
+deudaAFavor' = foldr ((+) . deuda) 0
+
+-- punto 5
+recetasEnOrden :: Pais -> [Receta] -> Bool
+--recetasEnOrden _ [] = True 
+recetasEnOrden _ [receta] = True 
+recetasEnOrden pais (receta1:receta2:recetas) =
+ pbi receta1 pais <= pbi receta2 pais && recetasEnOrden pais recetas
+--  | pbi receta1 pais <= pbi receta2 pais = recetasEnOrden pais recetas
+--  | otherwise = False
+
+
+#+END_SRC
+* Azucar sintactico 
+  Cuando usas {} no es parte del paradigma, es un chiche
+  Para evitarlo usa funciones, y los conceptos de funcional (aplicacion parcial, composicion, orden superior,..)
+  
+#+NAME: Modificar atributos con azucar sintatico
+#+BEGIN_SRC haskell
+aumentarEnergia cuantoAumenta personaje = personaje{ energia= energia personaje+cuantoAumenta}
+reducirEnergia cuantoReduce personaje = personaje{ energia= energia personaje-cuantoReduce}
+#+END_SRC
+
+#+NAME: Modificar atributos sin azucar sintactico
+#+BEGIN_SRC haskell
+cambiarEnergia cuantoCambia (UnPersonaje nombre energia)= UnPersonaje nombre (cuantoCambia energia)
+-- con 1.5 representa al 150%, por tanto le suma 50%
+tomarCafe personaje = cambiarEnergia (*1.5) personaje
+-- con flip hacemos que al total de energia le reste 50 (caso contrario a 50 le restaria la energia, que no es la idea)
+-- con max 0, fijamos un valor minimo, el resultado de restar evalua que no sea negativo
+-- ademas usamos composicicion
+estudiar personaje = cambiarEnergia (max 0.flip (-) 50) personaje
+#+END_SRC
+* Inferir funciones
+  Esto seria el tipado de una funcion, que es lo que espera recibir y devolver
+#+BEGIN_SRC haskell
+  -- Algunos a modo de ejemplo
+  f a b c = any ((> b).a b).filter (c 10)
+#+END_SRC
+
+* [#A] Recursividad
+ 1. Ordenar de mayor a menor por criterio (viceversa)
+ 2. Buscar por criterio, criterios
+** El mayor de una lista
+#+NAME: El mayor de una lista
+#+BEGIN_SRC haskell
+
+#+END_SRC
+** Contadores segun criterios
+
+#+BEGIN_SRC haskell
+  -- REVISAR
+  data Habilidad = UnaHabilidad{ tipo::String, nivel::Int, danio::Int }
+  data Personaje = UnPersonaje{ nombre::String, habilidades::[Habilidad], vitalidad::Int }
+
+  thor = UnPersonaje "Thor" [UnaHabilidad "ataque" 1 500, UnaHabilidad "defensa" 1 0] 500
+  loki = UnPersonaje "loki" [UnaHabilidad "ataque" 1 100, UnaHabilidad "defensa" 1 0] 500
+
+  atacarHastaVencer :: Personaje -> Personaje -> Personaje
+  atacarHastaVencer personaje enemigo =  
+    foldr (atacarCon) enemigo (habilidadesDeAtaqueDe personaje)
+    where habilidadesDeAtaqueDe personaje = (filter (=="ataque".tipo).habilidades) personaje
+
+  atacarCon :: Habilidad -> Personaje -> Personaje
+  atacarCon habilidad personaje =
+
+  puededeVencerA :: Personaje -> Personaje -> Bool
+  puedeVencerA personaje enemigo = ((== 0).salud.ataque personaje) enemigo
+
+#+END_SRC
+
+#+NAME: Recursividad con guardas y pattern matching (Parcial minigolfito 2020)
+#+BEGIN_SRC haskell
+  data Tiro = UnTiro {
+    velocidad :: Int,
+    precision :: Int,
+    altura :: Int
+  } deriving (Eq, Show)
+
+  data Obstaculo = UnObstaculo {
+    puedeSuperar :: Tiro -> Bool,
+    efectoLuegoDeSuperar :: Tiro -> Tiro
+  } 
+
+  cuantosObstaculosConsecutivosSupera :: Tiro -> [Obstaculo] -> Int
+  -- 1. Caso base (expresion no recursiva, la que detiene la expresion recursiva)
+  --    Cuando no haya mas elementos en la lista, devolve cero
+  cuantosObstaculosConsecutivosSupera tiro [] = 0
+  -- 2. Caso recursivo (con guardas)
+  -- 2.1 le paso "tiro" y una lista con "cabeza:cola" la cabeza es un elemento Tiro, 
+  --     y la cola pueden ser ninguno [] o varios [Tiro, Tiro, ..]
+  cuantosObstaculosConsecutivosSupera tiro (obstaculo : obstaculos)
+  -- 2.2 si se cumple la condicion, devuelve 1 + expresion recursiva (ademas modifica a Tiro con efectoLuegoDeSuperar)
+  --     siempre que se cumpla sumara 1+1+1+... cuando no se cumpla ira al otherwise que devuelve 0
+  --     pero "NO" corta la llamada recursiva, solo cuando deja de haber elementos en la lista
+    | puedeSuperar obstaculo tiro = 1 + cuantosObstaculosConsecutivosSupera (efectoLuegoDeSuperar obstaculo tiro) obstaculos
+    | otherwise = 0
+#+END_SRC
+
+** Pendientes a revisar
+   - Practicar el where
+   - Practicar con AND y OR
+
+#+name: Mayor de una lista con Guardas
+#+BEGIN_SRC haskell
+gemaMasPoderosa :: Personaje -> Guantelete -> Gema
+gemaMasPoderosa personaje guantelte = gemaMasPoderosaDe personaje  (gemas guantelte)
+
+gemaMasPoderosaDe :: Personaje -> [Gema] -> Gema
+gemaMasPoderosaDe _ [gema] = gema
+gemaMasPoderosaDe personaje (gema1:gema2:gemas) 
+ | (energia.gema1) personaje < (energia.gema2) personaje = gemaMasPoderosaDe personaje (gema1:gemas)
+ | otherwise = gemaMasPoderosaDe personaje (gema2:gemas)
+
+
+
+#+END_SRC
+
+#+NAME: Usando where y && 
+#+BEGIN_SRC haskell
+  estaOrdenado :: Pais -> [Receta] -> Bool
+  estaOrdenado pais [receta] = True
+  estaOrdenado pais (receta1:receta2:recetas) 
+       = revisarPBI receta1 pais <= revisarPBI receta2 pais && estaOrdenado pais (receta2:recetas)  
+       where revisarPBI receta = pbi . aplicarReceta receta
+#+END_SRC
+
+* Expresividad 
+* Funciones interesantes
+  En algunos ejercicios te olvidabas de las siguientes funciones
+  + id: devuelve lo mismo que recibe, sin cambiar
+  + iterate
+    1. Evitas crear funciones recursivas (no evitas usarlas, porque esta lo es)
+    2. Repite una funcion (a->a) que recibe 1 argumento a
+    3. Se puede detener la recursividad con (take, !!)
+  + replicate
+    1. Evitas crear funciones recursivas (no evitas usarlas, porque esta lo es)
+    2. 
+
+    Algunos ejemplos
+#+NAME: Ejemplos con id
+#+BEGIN_SRC haskell
+-- si no lo agregamos se mostrara un warning al tratar de mostrar atacar
+import Text.Show.Functions
+
+data Habilidad = UnaHabilidad{
+  nombre::String
+}deriving(Show)
+
+data Villano = UnVillano {
+  nombreVillano :: String,
+  energia :: Int,
+  atacar :: (Villano->Villano),
+  habilidades :: [String]
+}deriving(Show)
+
+patri :: Villano
+noHacerNada = id
+-- al tercer parametro, que seria "atacar" le pasamos la funcion "id"
+-- como no tenemos una funcion "atacar" para ese villano
+-- le pasamos una generica que imita a "atacar", que tambien recibe y devuelve un algo (a->a)
+patri = UnVillano "patricio" 100 (noHacerNada) []
+#+END_SRC
+
+#+NAME: Ejemplos con replicate
+#+BEGIN_SRC haskell
+--type Tarea = String
+data Tarea = UnaTarea{ nombre::String }
+data Alumno = UnAlumno{ nombre::String, tareas::[Tarea]}
+
+manu :: Alumno
+manu = UnAlumno "manu" (UnaTarea "dormir":UnaTarea "comer":inventarTareas 10)
+
+inventarTareas :: Int -> [Tarea]
+inventarTareas cuantas = replicate cuantas (UnaTarea "estudiar")
+#+END_SRC
+
+#+NAME: Ejemplos Iterate
+#+BEGIN_SRC haskell
+noHacerNada = id
+data Personaje = UnPersonaje{ nombre::String, edad::Int }
+carlos = Personaje "carlos" 19
+
+-- incremento su energia en +100
+tomarCafe personaje = (cambiarEnergiaEn ((+) 100)) personaje
+-- hacemos que se repita la accion de "tomarCafe" n veces, 
+-- y con (!! n)  agarramos el ultimo cambio
+tomarMuchosCafes cuantos personaje = ((!! cuantos).iterate tomarCafe) personaje
+#+END_SRC
+* Implementaciones complejas
+  - Apartado en general de funciones, recursivas, con fold, etc.. que quizas confundan
+
+#+NAME: Usando all && filter dentro de otro filter
+#+BEGIN_SRC haskell
+  data Jugador = UnJugador {
+    nombre :: String,
+    padre :: String,
+    habilidad :: Habilidad
+  } deriving (Eq, Show)
+
+  type Puntos = Int
+
+  jugadorDeTorneo = fst
+  puntosGanados = snd
+
+  pierdenLaApuesta :: [(Jugador, Puntos)] -> [String]
+  -- puntosDeTorneo es una lista de cada jugador con sus puntos
+  pierdenLaApuesta puntosDeTorneo
+    = (map (padre.jugadorDeTorneo) . filter (not . gano puntosDeTorneo)) puntosDeTorneo
+  -- 1. Filtro los jugadores que no cumplan la condicion
+  -- NOTA: El criterio del filtro va a comparar cada jugador con todos, es decir A con todos, B con Todos, ..
+  -- 2. Listo los nombres de los padres de cada jugador que no cumplio la condicion
+
+  gano :: [(Jugador, Puntos)] -> (Jugador, Puntos) -> Bool
+  gano puntosDeTorneo puntosDeUnJugador = 
+    (all ((< puntosGanados puntosDeUnJugador).puntosGanados). filter (/= puntosDeUnJugador)) puntosDeTorneo
+  -- 1. Filtra todos los jugadores que no sean ese jugador (para poder compararlo con el resto y no consigo mismo)
+  -- 2. Evalua si del listado filtrado (1) todos cumplen con el criterio del all
+  --    compara el jugador especifico (A) con cada jugador (B,C,D,...), si este tiene menor puntaje que cada uno
+  --    es decir si es el que tiene menor puntaje.
+  --    NOTA: el criterio es ((< puntosGanados puntosDeUnJugador).puntosGanados)
+  -- 3. Si ese jugador no tiene mayor puntaje, entonces devuelve True
+  --    NOTA: Es importante devolver un Bool (es lo que espera el filter de pierdenLaApuesta)
+  -- Obs: el (/=) es como en otros lenguajes el !=
+#+END_SRC
+
+* Errores Comunes
+  Puede que se repita en las otras secciones
+** El tipo y el constructor del data y sus atributos
+#+BEGIN_SRC haskell
+-- lo que esta antes del = es el tipo
+-- lo que esta luego del = es el constructor
+-- pueden llamarse diferentes
+data Persona = UnPersona{
+  nombre :: String,
+  edad :: Int
+}
+
+data Personaje = Personaje{
+-- si entre data tienen atributos identicos, cambiarlo (sino el programa tira error)
+-- ese atributo es una funcion que se usara en todo el programa
+  nombrePersonaje :: String,
+  edad :: Int
+}
+
+-- Al tipar la funcion, hacer referencia al tipo del data, lo que se nombro a la izquierda del =
+carlos :: Persona
+-- Al definir la funcion, hacer referencia al constructor del data, lo que estaba a la derecha del =
+carlos = UnaPersona "Carlos" 33
+#+END_SRC
+** Cambiar atributos Data con aplicacion parcial y composicion
+   Esta manera evita la repeticion de codigo y aplicar conceptos de funcional
+
+#+BEGIN_SRC haskell
+data Personaje = UnPersonaje{ nombre::String, energia::Int, honor::Int }
+data Espada = UnaEspada{ peso::Int }
+
+type Efecto = Personaje -> Personaje
+
+atacarCon :: Espada -> Efecto
+atacarCon espada personaje = 
+  -- cambiamos atributos con funciones (-, +, *,..) que esperan un valor, en vez de pasarle un valor
+  -- pasarle una funcion (Int->Int) evita la repeticion de codigo a posterior
+  (cambiarHonor (+10).cambiarEnergia ((+) pesoDeLaEspada)) personaje
+  -- usamos la clausula "where" para mejorar la expresividad (se puede usar en guardas, funciones,..)
+  where pesoDeLaEspada = ((*2).peso) espada
+
+cambiarHonor :: (Int->Int) -> Efecto
+cambiarHonor cuanto (UnPersonaje nombre energia honor) = UnPersonaje nombre energia (cuanto honor)
+
+cambiarEnergiaEn :: (Int->Int) -> Efecto
+-- mejoramos la expresividad usando type classes, priorizando que habra "efecto"
+--cambiarEnergiaEn :: (Int -> Int) -> (Personaje -> Personaje)
+cambiarEnergiaEn cuanto (UnPersonaje nombre energia honor) = UnPersonaje nombre (cuanto energia) honor
+
+-- Observacion
+-- El tipado de (+10) o ((+) 10) es (Int -> Int), espera un numero
+-- esta expresion (*2.+10) 3 hace.. 3+10=13*2=26.. el resultado seria 26
+#+END_SRC
+
