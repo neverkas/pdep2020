@@ -1,5 +1,8 @@
 #+TITLE: Apunte PDEP - Paradigma Lógico
 
+NO USES ESTE, USÁ EL DE APUNTES DE DROPBOX
+
+
 [[https://app.mural.co/t/pdepmit6138/m/pdepmit6138/1592100921683/322a94a393db664a908221d60ab372a4845aced5][Mural Lógico]]
 
 * Pendientes por leer
@@ -290,6 +293,77 @@
     - [[http://wiki.uqbar.org/wiki/articles/polimorfismo-en-el-paradigma-logico.html][Polimorfismo - Wiki Uqbar]]
     - [[https://github.com/pdep-mit/ejemplos-de-clase-prolog/blob/master/clase3.pl][Ejemplo de Clase 3]]
     - [[https://github.com/pdep-mit/ejemplos-de-clase-prolog/blob/master/clase4.pl][Ejemplo de Clase 4]]
+** Inversibilidad
+   + El orden importa pero no con las *clausulas* 
+** Predicado find/all
+*** Conceptos
+    + es de orden superior: toma una consulta como segundo parámetro
+    + toma una variable en su primer argumento, pero no la genera (no aparece entre las variables de la solución)
+    + es inversible para su último argumento: genera una lista con todas las soluciones posibles de la consulta, en el orden en que prolog las encuentra
+    
+    + Notá que no importa cuantas soluciones genere una consulta, si esa consulta la pasamos al findall, éste generará una sóla solución.
+      #+BEGIN_SRC prolog
+        % findall(Empleado, empleado(Empleado), Empleados).
+        % Empleados = [jose, maria, pedro, magdalena].
+        empleadosNecesitados(Empleados):-
+            findall(Empleado, necesita(Empleado, _), Empleados).
+      #+END_SRC
+    + Pensá que tiene mucho sentido que el primer argumento no sea inversible: porque es una variable que va a ir tomando valores diferentes en cada solución de la consulta. ¡Pero el findall sólo puede generar una!
+      #+BEGIN_SRC prolog
+        herramientasDemandadas(Herramientas):-
+            findall(Herramienta, necesita(_,Herramienta),Herramientas).
+      #+END_SRC
+    
+*** Consultas básicas     
+    consultas para las que necesitamos toda la información de la base de conocimiento, y no simplemente una parte. 
+
+    + Conocer todos los individuos cumplen una propiedad
+    + Conocer cuántos individuos cumplen una propiedad
+    + Conocer la sumatoria de los individuos generados por una relación
+    + si no sos precavido, podés terminar haciendo un predicado que dependa del orden en que definiste las cosas en tu base de conocimientos. Y eso es malo, porque pequeños cambios en la base pueden traer consecuencias nefastas. 
+*** Ejemplos
+    + El tercer parámetro siempre es inversible (será la lista, el resultado del 2do parámetro)
+    + El primero no es inversible, hay que usar un predicado generador
+    + El primero es el que usaré en el segundo parámetro de busqueda
+
+    #+BEGIN_SRC prolog
+      /*
+      - para que la lista de herramientas que arme el findall sólo contenga las herramientas que una misma persona necesite,
+      la consulta de necesita/2 que se use para armar la lista debería ser individual para la persona
+      y existencial para la herramienta.
+
+      Al ligar la variable Persona antes del findall, el predicado herramientasDemandadasPor/2 será completamente inversible.
+      ,*/
+
+      herramientasDemandadasPor(Persona, Herramientas):-
+          necesita(Persona, _),
+          findall(Herramienta, necesita(Persona, Herramienta), Herramientas).
+    #+END_SRC
+*** Posibles Errores
+
+    #+BEGIN_SRC prolog
+      /*
+      * si queremos saber si una herramienta no la necesita nadie podríamos hacer
+      */
+
+      % Version correcta
+      noLaNecesitaNadie(Herramienta):-
+          %necesita(_, Herramienta),
+          not(necesita(_, Herramienta)).
+
+      % Version incorrecta
+      noLaNecesitaNadie(Herramienta):-
+          findall(Persona, necesita(Persona,Herramienta), Personas),
+          length(Personas, 0).
+    #+END_SRC
+
+*** Predicado asociados
+**** Predicado length/2
+     Relaciona una lista con su longitud
+**** Predicado list_to_set/2
+     Relaciona a una lista con otra que se le han quitado sus repetidos
+**** sumlist/2
+**** nth0/3 y nth1
 * Conceptos WikiUqbar/Apuntes de la Catedra
 ** Conceptos básicos
 *** Declaratividad
@@ -453,56 +527,57 @@
       %% ?- persona(marge)
       %% true
     #+END_SRC
-    
 *** Hechos y Reglas
     - Un *hecho* es una afirmación
     - Una *regla* es una condición con antecedente=>consecuente, que puede ser:
-      - es *regla simple* si sólo tiene una condición
+      - es *regla simple* si sólo tiene una condición (el predicado no tiene comas, ni se repite varias veces)
       - es *regla compuesta* si tiene varias condiciones conectadas con operadores lógicos (AND, OR)
         Los operadores lógicos separan las clausulas, por ejemplo el operador lógico OR (disyunción) es el punto
         mientras que el operador logico AND (conjunción) es el punto
 
-   #+BEGIN_SRC prolog
-     %% Los siguientes son hechos
-     %%
-     %% persona/2 es un predicado formado por dos clausulas que son hechos
-     persona(homero).
-     persona(bart).
-     %% mascota/2 es otro predicado formado por tres clausulas que son hechos
-     mascota(firulay).
-     mascota(margaret).
-     mascota(pepito).
+    #+BEGIN_SRC prolog
+      %% Los siguientes son hechos
+      %%
+      %% persona/2 es un predicado formado por dos clausulas que son hechos
+      persona(homero).
+      persona(bart).
+      %% mascota/2 es otro predicado formado por tres clausulas que son hechos
+      mascota(firulay).
+      mascota(margaret).
+      mascota(pepito).
 
-     duenio(homero, firulay).
-     duenio(bart, margaret).
+      %% es cierto que homero es el dueño de firulay
+      duenio(homero, firulay).
+      %% es cierto que bart es el duenio de margaret
+      duenio(bart, margaret).
 
-     tieneCasa(homero).
-     tieneCasa(bart).
+      tieneCasa(homero).
+      tieneCasa(bart).
 
-     %% Las siguientes son reglas
-     %%
-     %% suertudo/1 es una regla simple
-     %% porque tiene solo una condición duenio/2
-     %%
-     %% si la persona es duenio de alguna mascota, entonces es suertudo
-     suertudo(Persona):- duenio(Persona, _).
+      %% Las siguientes son reglas
+      %%
+      %% suertudo/1 es una regla simple
+      %% porque tiene solo una condición duenio/2
+      %%
+      %% si la persona es duenio de alguna mascota, entonces es suertudo
+      suertudo(Persona):- duenio(Persona, _).
 
-     %% triste/1 es una regla compuesta
-     %% porque tiene dos condiciones conectadas por un "Y logico" (conjunción)
-     %%
-     %% si una persona es duenio de alguna mascota pero no tiene casa, entonces está triste
-     triste(Persona):-
-         duenio(Persona,_),
-         not(tieneCasa(Persona)).
+      %% triste/1 es una regla compuesta
+      %% porque tiene dos condiciones conectadas por un "Y logico" (conjunción)
+      %%
+      %% si una persona es duenio de alguna mascota pero no tiene casa, entonces está triste
+      triste(Persona):-
+          duenio(Persona,_),
+          not(tieneCasa(Persona)).
 
-     %% feliz/1 es una regla compuesta
-     %% porque tiene dos condiciones conectadas por un "O lógico" (disyuncion)
-     %% la disyunción se forma cuando un predicado tiene varias reglas conectadas por un punto
-     %%
-     %% si una persona es duenio de alguna mascota ó tiene una casa, entonces es feliz
-     feliz(Persona):- duenio(Persona,_).
-     feliz(Persona):- tieneCasa(Persona).
-   #+END_SRC
+      %% feliz/1 es una regla compuesta
+      %% porque tiene dos condiciones conectadas por un "O lógico" (disyuncion)
+      %% la disyunción se forma cuando un predicado tiene varias reglas conectadas por un punto
+      %%
+      %% si una persona es duenio de alguna mascota ó tiene una casa, entonces es feliz
+      feliz(Persona):- duenio(Persona,_).
+      feliz(Persona):- tieneCasa(Persona).
+    #+END_SRC
 
 *** Inversibilidad
       + Un *predicado* es inversible, si los *parámetros* pueden usarse como entrada/salida
