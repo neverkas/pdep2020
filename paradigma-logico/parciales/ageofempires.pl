@@ -74,13 +74,14 @@ tiene(aleP, unidad(samurai, 199)).
 tiene(aleP, unidad(espadachin, 10)).
 tiene(aleP, unidad(granjero, 10)).
 %% tiene(aleP, recurso(800, 300, 100)).
-tiene(aleP, recurso(800, 3000, 100)).
+tiene(aleP, recurso(800, 3000, 300)).
 tiene(aleP, edificio(casa, 40)).
 tiene(aleP, edificio(castillo, 1)).
 tiene(juan, unidad(carreta, 10)).
 %% agrego extra para probar PUNTO 8 <<<<
 tiene(juan, unidad(carreta, 10)).
-
+tiene(aleP, edificio(establo, 1)).
+tiene(aleP, edificio(herreria, 1)).
 /*
 3) Definir el predicado alarico/1 que se cumple para un jugador si solo tiene unidades de infantería.
 */
@@ -268,6 +269,8 @@ avanzaA(Jugador, edadCastillos):-
     cuantosRecursosTieneDe(oro, Recursos, CantidadOro),
     cuantosRecursosTieneDe(alimento, Recursos, CantidadAlimento),
     tieneConstruccionesEdadCastillo(Jugador),
+    %% construccionEdadCastillo(ConstruccionEdadCastillo),
+    %% tieneEdificio(Jugador, ConstruccionEdadCastillo),
     CantidadOro >= 200, CantidadAlimento >= 800.
 
 avanzaA(Jugador, edadImperial):-
@@ -279,10 +282,12 @@ avanzaA(Jugador, edadImperial):-
     CantidadAlimento >= 1000, CantidadOro >= 800.
 
 tieneConstruccionesEdadCastillo(Jugador):-
-    tieneEdificio(Jugador, herreria),
-    tieneEdificio(Jugador, establo).
-tieneConstruccionesEdadCastillo(Jugador):-
-    tieneEdificio(Jugador, galeriaDeTiro).
+    construccionEdadCastillo(Construccion),
+    tieneEdificio(Jugador, Construccion).
+
+construccionEdadCastillo(herreria).
+construccionEdadCastillo(establo).
+construccionEdadCastillo(galeriaDeTiro).
 
 cuantosRecursosTieneDe(alimento, recurso(_, Cantidad, _), Cantidad).
 cuantosRecursosTieneDe(madera, recurso(Cantidad, _ ,_), Cantidad).
