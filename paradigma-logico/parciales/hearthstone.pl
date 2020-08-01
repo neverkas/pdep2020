@@ -1,21 +1,26 @@
+% https://yugioh.fandom.com/es/wiki/Categor%C3%ADa:Bestia
+% https://yugioh.fandom.com/es/wiki/Categor%C3%ADa:Lanzador_de_Conjuros
+
 % jugador(Nombre, PuntosVida, PuntosMana,  CartasMazo, CartasMano, CartasCampo)
-jugador(jugador(carlos, 500, 500, [fuegoAncestral, curacion, zombies],  [zombies], [fuego, zombies])).
-jugador(jugador(fede, 500, 500, [curacion, zombies],  [fuegoAncestral], [zombies])).
-jugador(jugador(pepe, 500, 500, [curacion],  [fuegoAncestral], [curacion])).
-jugador(jugador(juan, 500, 200, [momia, godzilla],  [momia, dracula], [momia])).
-jugador(jugador(juancito, 500, 500, [momia, godzilla],  [momia, dracula], [momia])).
+jugador(jugador(yugiMoto, 500, 500, [exodiaElProhibido, dragonDeOjosRojos],  [magoOscuro], [damaDeLaFe, damaDeLaFe])).
+jugador(jugador(setoKaiba, 500, 500, [doncellaDeOjosAzules, leviatan],  [magoOscuro], [magoOscuro])).
+jugador(jugador(bakura, 500, 500, [damaDeLaFe],  [exodiaElProhibido], [doncellaDeOjosAzules])).
+jugador(jugador(yamiYugi, 500, 200, [caballeroFeloz, dragonMaldito],  [infernoble, infernoble], [kraken])).
+jugador(jugador(mokubaKaiba, 500, 500, [caballeroFeloz, infernoble],  [leviatan, leviatan], [kraken])).
 
 % criatura(Nombre, PuntosDaño, PuntosVida, CostoMana)
-carta(criatura(godzilla, 500, 500, 300)).
-carta(criatura(dracula, 300, 800, 300)).
-carta(criatura(momia, 10, 200, 100)).
+carta(criatura(caballeroFeloz, 500, 500, 300)).
+carta(criatura(dragonMaldito, 300, 800, 300)).
+carta(criatura(infernoble, 10, 200, 100)).
+carta(criatura(leviatan, 10, 200, 100)).
+carta(criatura(kraken, 10, 200, 100)).
 
 % hechizo(Nombre, FunctorEfecto, CostoMana)
-carta(hechizo(fuegoMortal, danio(500), 100)).
-carta(hechizo(fuegoAncestral, danio(200), 100)).
-carta(hechizo(zombies, danio(100), 100)).
-carta(hechizo(sanacion, curar(300), 300)).
-carta(hechizo(meditacion, curar(100), 100)).
+carta(hechizo(exodiaElProhibido, danio(500), 100)).
+carta(hechizo(magoOscuro, danio(200), 100)).
+carta(hechizo(dragonDeOjosRojos, danio(100), 100)).
+carta(hechizo(doncellaDeOjosAzules, curar(300), 300)).
+carta(hechizo(damaDeLaFe, curar(100), 100)).
 
 cartasMazo(jugador(_,_,_,Cartas,_,_), Cartas).
 cartasMano(jugador(_,_,_,_,Cartas,_), Cartas).
@@ -29,8 +34,8 @@ nombre(hechizo(Nombre,_,_), Nombre).
 1. Relacionar un jugador con una carta que tiene. La carta podría estar en su mano, en el campo o en el mazo.
 */
 
-tieneCarta(UnJugador, Carta):-
-    jugador(Jugador), nombre(Jugador, UnJugador),
+tieneCarta(NombreJugador, Carta):-
+    jugador(Jugador), nombre(Jugador, NombreJugador),
     todasLasCartasDe(Jugador, Cartas),
     esAlgunaDe(Cartas, Carta).
 
@@ -46,10 +51,10 @@ esAlgunaDe(Cartas, Carta):-
  ya sea en el mazo, la mano o el campo, son criaturas.
 */
 
-guerrero(UnJugador):-
-    jugador(Jugador), nombre(Jugador, UnJugador),
+guerrero(NombreJugador):-
+    jugador(Jugador), nombre(Jugador, NombreJugador),
     forall(
-         tieneCarta(UnJugador, Carta),
+         tieneCarta(NombreJugador, Carta),
          tipoCriatura(Carta)
     ).
 
@@ -64,8 +69,8 @@ mana(jugador(_,_,Mana,_,_,_), Mana).
 mana(criatura(_,_,_,Mana), Mana).
 mana(hechizo(_,_,Mana), Mana).
 
-despuesDeSuTurno(UnJugador, JugadorConMasMana):-
-    jugador(Jugador), nombre(Jugador, UnJugador),
+despuesDeSuTurno(NombreJugador, JugadorConMasMana):-
+    jugador(Jugador), nombre(Jugador, NombreJugador),
     cartasMazo(Jugador, CartasMazo), primeraCarta(CartasMazo, Carta),
 
     agregarEnMano(Carta, Jugador, JugadorConNuevasCartas),
@@ -92,17 +97,17 @@ Este predicado no necesita ser inversible!
 en el próximo turno si tras empezar ese turno está en la mano y además se cumplen las condiciones del punto 4a
 */
 
-puedeJugarCon(UnJugador, UnaCarta):-
-    jugador(Jugador), nombre(Jugador, UnJugador), mana(Jugador, JugadorCuantoMana),
+puedeJugarCon(NombreJugador, UnaCarta):-
+    jugador(Jugador), nombre(Jugador, NombreJugador), mana(Jugador, JugadorCuantoMana),
     carta(Carta), nombre(Carta, UnaCarta), mana(Carta, CartaCostoDeMana),
     JugadorCuantoMana >= CartaCostoDeMana.
 
-cartaParaProximoTurno(UnJugador, Carta):-
-    jugador(Jugador), nombre(Jugador, UnJugador),
+cartaParaProximoTurno(NombreJugador, Carta):-
+    jugador(Jugador), nombre(Jugador, NombreJugador),
     cartasMano(Jugador, CartasMano),
 
     % también podría usar el findall, y devolver sólo una lista
-    puedeJugarCon(UnJugador, Carta), member(Carta, CartasMano).
+    puedeJugarCon(NombreJugador, Carta), member(Carta, CartasMano).
 
 /*
 5. Conocer, de un jugador, todas las posibles jugadas que puede hacer en el próximo turno,
@@ -122,20 +127,6 @@ todasLasPosiblesJugadas(UnJugador, Cartas):-
 %    ).
 
 
-jugar(_, jugador(Nombre, PuntosVida, PuntosMana,  CartasMazo, [], CartasCampo),
-      jugador(Nombre, PuntosVida, PuntosMana,  CartasMazo, [], CartasCampo)).
-
-jugar(UnaCarta, jugador(Nombre, PuntosVida, PuntosMana,  CartasMazo, CartasMano, CartasCampo),
-      jugador(Nombre, PuntosVida, PuntosManaPorJugar,  CartasMazo, CartasMano, CartasCampo)):-
-
-    carta(Carta), nombre(Carta, UnaCarta), mana(Carta, CartaCostoDeMana),
-    PuntosManaPorJugar is PuntosMana-CartaCostoDeMana,
-
-    cartaParaProximoTurno(jugador(Nombre, PuntosVida, PuntosManaPorJugar,  CartasMazo, CartasMano, CartasCampo), NuevaCarta),
-
-    jugar(NuevaCarta, jugador(Nombre, PuntosVida, PuntosManaPorJugar,  CartasMazo, CartasMano, CartasCampo),
-          jugador(Nombre, PuntosVida, PuntosManaPorJugar,  CartasMazo, CartasMano, CartasCampo)).
-
 */
 
 
@@ -143,14 +134,15 @@ jugar(UnaCarta, jugador(Nombre, PuntosVida, PuntosMana,  CartasMazo, CartasMano,
 6. Relacionar a un jugador con el nombre de su carta más dañina.
 */
 
+
 danio(criatura(_,Danio,_,_), Danio).
 danio(hechizo(_,danio(Danio),_), Danio).
 
-cartaMasDanina(UnJugador, UnaCarta):-
-    jugador(Jugador), nombre(Jugador, UnJugador),
+cartaMasDanina(NombreJugador, UnaCarta):-
+    jugador(Jugador), nombre(Jugador, NombreJugador),
     tieneCarta(_, UnaCarta),
     forall(
-        (tieneCarta(UnJugador, OtraCarta), UnaCarta \= OtraCarta),
+        (tieneCarta(NombreJugador, OtraCarta), UnaCarta \= OtraCarta),
         mayorDanio(UnaCarta, OtraCarta)
     ).
 
@@ -161,8 +153,31 @@ mayorDanio(Carta1, Carta2):-
 
 /*
 7. Cuando un jugador juega una carta, él mismo y/o su rival son afectados de alguna forma:
-jugarContra/3. Modela la acción de jugar una carta contra un jugador. Relaciona a la carta, el jugador antes de que le jueguen la carta y el jugador después de que le jueguen la carta. Considerar que únicamente afectan al jugador las cartas de hechizo de daño.
+jugarContra/3. Modela la acción de jugar una carta contra un jugador.
+Relaciona a la carta, el jugador antes de que le jueguen la carta y el jugador después de que le jueguen la carta.
+Considerar que únicamente afectan al jugador las cartas de hechizo de daño.
 Este predicado no necesita ser inversible para la carta ni para el jugador antes de que le jueguen la carta.
-BONUS: jugar/3. Modela la acción de parte de un jugador de jugar una carta. Relaciona a la carta, el jugador que puede jugarla antes de hacerlo y el mismo jugador después de jugarla. En caso de ser un hechizo de cura, se aplicará al jugador y no a sus criaturas. No involucra al jugador rival (para eso está el punto a).
 
+BONUS: jugar/3. Modela la acción de parte de un jugador de jugar una carta. Relaciona a la carta, el jugador que puede jugarla antes de hacerlo y el mismo jugador después de jugarla. En caso de ser un hechizo de cura, se aplicará al jugador y no a sus criaturas. No involucra al jugador rival (para eso está el punto a).
 */
+
+jugarContra(NombreDeCarta, NombreJugador, JugadorDespues):-
+    jugador(JugadorAntes), nombre(JugadorAntes, NombreJugador),
+    danioPorTipoDeCarta(NombreDeCarta, CartaCuantoDanio),
+    reducirVitalidad(CartaCuantoDanio, JugadorAntes, JugadorDespues).
+
+danioPorTipoDeCarta(NombreDeCarta, 0):-
+    carta(Carta), nombre(Carta, NombreDeCarta),
+    not(tipoHechizo(NombreDeCarta)).
+
+danioPorTipoDeCarta(NombreDeCarta, CuantoDanio):-
+    carta(Carta), nombre(Carta, NombreDeCarta),
+    tipoHechizo(NombreDeCarta),
+    danio(Carta, CuantoDanio).
+
+tipoHechizo(NombreDeCarta):-
+    carta(hechizo(NombreDeCarta, _, _)).
+
+reducirVitalidad(Cuanto, jugador(Nombre, PuntosVida, PuntosMana,  CartasMazo, CartasMano, CartasCampo),
+                jugador(Nombre, NuevosPuntosVida, PuntosMana,  CartasMazo, CartasMano, CartasCampo)):-
+    NuevosPuntosVida is PuntosVida-Cuanto.
