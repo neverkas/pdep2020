@@ -133,11 +133,10 @@ class Comedero inherits Dispositivo{
 
 class ComederoRecargable inherits Comedero{
 	var cantidadRaciones = 0
-	var tamanioRacion = 0
 	
 	method tieneRaciones() = cantidadRaciones > 0
-	method recargarRacion(){
-		cantidadRaciones += tamanioRacion
+	method recargarRacion(cantidad){
+		cantidadRaciones += cantidad
 	}
 	
 	override method consumoEnergetico() = cantidadRaciones * 2
@@ -150,11 +149,9 @@ class ComederoRecargable inherits Comedero{
 		if(not self.tieneRaciones())
 			self.error("No hay raciones suficiente para atender al animal")
 		
-		cantidadAlimento = tamanioRacion
-		
 		super(animal)
 		
-		cantidadRaciones -= tamanioRacion				
+		cantidadRaciones -= 1				
 	}
 }
 
