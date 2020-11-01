@@ -13,46 +13,49 @@ class Animal{
 	method recibirVacunacion(){ }
 }
 
-object vaca inherits Animal{
+class Vaca inherits Animal{
 	override method comer(cantidad){
 		peso += cantidad / 3
 		tieneSed = true
 	}
 	
 	override method beber(){
-		peso -= 500
+		peso -= 0.5 // 500grs
 		tieneSed = false
 	}
 	
-	override method tieneHambre() = peso < 200	
+	override method tieneHambre() = peso < 200 // kg	
 }
 
-object cerdo inherits Animal{
+class Cerdo inherits Animal{
 	var vecesQueComioSinBeber = 0
 	
 	override method comer(cantidad){
 		vecesQueComioSinBeber +=1 
 		
-		// TODO: 200kg? ò 200grs? comparar con el peso
-		if(cantidad > 200)
+		if(cantidad > 0.2) // 200 grs
 			peso += cantidad - 200
-		// TODO: 1000 gramos o 1000 kg? comparar con el peso
-		if(cantidad > 1000)
+		if(cantidad > 1) // 1 Kg
 			tieneHambre = false
 	}
-	// TODO: al parecer es vecesQueComioSinBeber=0
+
 	override method beber(){
 		tieneHambre = true
-		vecesQueComioSinBeber -= 1
+		vecesQueComioSinBeber = 0
 	}
 	override method tieneSed() = vecesQueComioSinBeber > 3
 	
 }
 
-object gallina inherits Animal(tieneHambre=true, tieneSed=true){
-	override method comer(cantidad){		
+class Gallina inherits Animal{
+	override method tieneHambre() = true
+	override method tieneSed() = true
+	
+	override method comer(cantidad){
+		// no hace nada		
 	}
 	override method beber(){
+		// no hace nada
 	}
 	
 }
