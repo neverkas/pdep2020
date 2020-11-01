@@ -13,7 +13,14 @@ class Animal{
 	method recibirVacunacion(){ }
 }
 
-class Vaca inherits Animal{
+class Mamifero inherits Animal{	
+	method esPesado() = peso > 50
+	
+	method caminar(horas){
+	}
+}
+
+class Vaca inherits Mamifero{
 	override method comer(cantidad){
 		peso += cantidad / 3
 		tieneSed = true
@@ -24,10 +31,14 @@ class Vaca inherits Animal{
 		tieneSed = false
 	}
 	
-	override method tieneHambre() = peso < 200 // kg	
+	override method tieneHambre() = peso < 200 // kg
+	
+	override method caminar(horas){
+		peso -= horas * 0.2		
+	}
 }
 
-class Cerdo inherits Animal{
+class Cerdo inherits Mamifero{
 	var vecesQueComioSinBeber = 0
 	
 	override method comer(cantidad){
@@ -44,6 +55,13 @@ class Cerdo inherits Animal{
 		vecesQueComioSinBeber = 0
 	}
 	override method tieneSed() = vecesQueComioSinBeber > 3
+	
+	override method caminar(horas){
+		if(tieneHambre)
+			peso -= horas * 0.5
+		else
+			peso -= horas * 0.3		
+	}
 	
 }
 
