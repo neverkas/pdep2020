@@ -74,8 +74,9 @@ class Dispositivo{
 	method esUtilPara(animal)
 }
 
-// TODO: Debe poder haber varios dispositivos, deberia ser una clase
-object bebedero inherits Dispositivo(consumoEnergetico=10){
+class Bebedero inherits Dispositivo{
+	override method consumoEnergetico() = 10
+	
 	override method atender(animal){
 		super(animal)
 		// TODO: será mejor animal.recibirLiquido() ?
@@ -85,34 +86,35 @@ object bebedero inherits Dispositivo(consumoEnergetico=10){
 	override method esUtilPara(animal) = animal.tieneSed()
 }
 
-// TODO: Debe poder haber varios dispositivos, deberia ser una clase
-object comedero inherits Dispositivo(consumoEnergetico=10){
+class Comedero inherits Dispositivo{
 	const cantidadAlimento = 0
 	const pesoSoportado = 0
 	
 	override method consumoEnergetico(){
-		return super() * pesoSoportado 
+		return 20 * pesoSoportado 
 	}
 	
 	override method atender(animal){		
-		self.sePuedeAtender(animal)
+		self.superaPesoMaximo(animal)
 		
 		super(animal)	
 		// TODO: será mejor animal.recibirComida()?		
 		animal.comer(cantidadAlimento)
 	}
 	
-	method sePuedeAtender(animal){
+	override method esUtilPara(animal) = animal.tieneHambre() && animal.peso() < pesoSoportado
+	
+	//
+	// Métodos adicionales
+	//
+	method superaPesoMaximo(animal){
 		if(animal.peso() > pesoSoportado)
-			self.error("El comedero no soporta un animal de " +animal.peso() +" Kg")		
+			self.error("El comedero no soporta un animal de "  + animal.peso() + " Kg")		
 	}
 	
-	// TODO: No pide mas erquisitos? no deberia tener incluir lo del peso?
-	method esUtilPara(animal) = animal.tieneHambre()
 }
 
-// TODO: Debe poder haber varios dispositivos, deberia ser una clase
-object vacunatorio inherits Dispositivo{
+class Vacunatorio inherits Dispositivo{
 	var vacunas = []
 	
 	override method consumoEnergetico(){
@@ -126,14 +128,17 @@ object vacunatorio inherits Dispositivo{
 		super(animal)
 		
 		if(self.convieneVacunar(animal)){
-			animal.recibirVacuna()
-			vacuna			
+			animal.recibirVacuna()			
 		}
 
 	}
 	
 	override method esUtilPara(animal) =
 		self.hayVacunas() && self.convieneVacunar(animal)
+
+	//
+	// Métodos adicionales
+	//
 	
 	method hayVacunas() = vacunas.size() > 0
 	
@@ -146,6 +151,7 @@ object vacunatorio inherits Dispositivo{
 			return false		
 	}
 }
+
 /*
  * Estacion
 */
@@ -161,9 +167,8 @@ class Estacion{
 		dispositivos.remove(dispositivo)
 	}
 	
-	// TODO: No falta algo?
 	method consumoEnergetico(){
-		return dispositivos.sum({dispositivo => dispositivo.consumoEnergetico()})
+		return dispositivos.sum({dispositivo => dispositivo.consumoEnergetico()}) * 1.1 // 100%+10%
 	}
 	
 	method esUtilPara(animal){
@@ -174,32 +179,29 @@ class Estacion{
 		return dispositivos.filter({dispositivo => dispositivo.esUtilPara(animal)})
 	}
 	
-	method atencionBasica(animal){
-		// TODO: el criterio parece ser distinto al de abajo
-		// TODO: se podria generalizar la excepcion, para que la lanze un método?
-		// asi si cambio el mensaje, no hay que cambiar uno por uno
-		if(!self.esUtilPara(animal))
-			self.error("Ningun dispositivo es util para este animal")
+	method atencionBasica(animal){		
+		self.confirmarSiEsUtil(animal)
 			
 		// que sucede si el mensaje min(), no encuentra ningun
-		// elemento? lanza excepción? se puede preguntar con un if?
-		// TODO: en vez de usar esUtilPara podrias usar dispositivosUtilesPara como colección? 
-		const dispositivo = dispositivos.min({
-			dispositivo => 
-			dispositivo.consumoEnergetico()
-			dispositivo.esUtilPara(animal)
+		// elemento? lanza excepción? se puede preguntar con un if? 
+		const dispositivo = self.dispositivosUtilesPara(animal).min({
+			dispositivo =>  dispositivo.consumoEnergetico()
 		})
 		
 		dispositivo.atender(animal)
 	}
 	
 	method atencionCompleta(animal){
-		if(!self.esUtilPara(animal))
-			self.error("Ningun dispositivo es util para este animal")
+		self.confirmarSiEsUtil(animal)
 		
 		// TODO: Tenia dudas si forEach era el adecuado
 		self.dispositivosUtilesPara(animal).forEach({
 			dispositivo => dispositivo.atender(animal)
 		})	
+	}
+	
+	method confirmarSiEsUtil(animal){
+		if(!self.esUtilPara(animal))
+			self.error("Ningun dispositivo es util para este animal")		
 	}
 }
