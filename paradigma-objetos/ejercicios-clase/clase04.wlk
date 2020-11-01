@@ -142,6 +142,7 @@ class Vacunatorio inherits Dispositivo{
 	
 	method hayVacunas() = vacunas.size() > 0
 	
+	// (???)
 	method convieneVacunar(animal){
 		if(animal == vaca && !animal.estaVacunada())
 			return true
