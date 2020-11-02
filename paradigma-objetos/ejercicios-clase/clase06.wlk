@@ -3,22 +3,24 @@
  */
 
 class Pirata{
-	// mapa, brujula, loro, cuchillo, botellaGrogXD
-	var items = []
+	var items = [] 	// mapa, brujula, loro, cuchillo, botellaGrogXD
 	var monedas = 0
 	var property nivelDeEbriedad = 0
 	var property seAnimaASaquear = false
 	
-	method esUtil(mision)
+	method esUtil(mision) = mision.esUtil(tripulante)
 	
-	// TODO: Como resolver esta igualdad (?)
+	// TODO: Esto me generaba dudas..
 	method seAnimaASaquear(victima){
+		victima.puedeSerSaqueadoPor(self)
+		/*
 		if(victima == BarcoPirata){
 			return self.estaPasadoDeGrog() && items.contains('botellaDeGrogXD'))
 		}
 		else if(victima == CiudadCostera){
 			return self.nivelDeEbriedad() >= 50
-		} 
+		}  
+		 */
 	}
 	
 	method estaPasadoDeGrog() = self.nivelDeEbriedad() >= 90	
@@ -31,6 +33,8 @@ class Pirata{
 	method seQuedaEn(ciudad){
 		ciudad.agregarHabitante(self)
 	}
+	
+	method tieneItem(item) =  items.contains(item)
 }
 
 class EspiaDeLaCorona inherits Pirata{
@@ -62,8 +66,8 @@ object busquedaDelTesoro inherits Mision{
 	}
 	
 	method tieneItemsParticulares(tripulante){
-		return tripulante.items().any({
-			item => itemsRequeridos.contains(item)
+		return itemsRequeridos.any({
+			item => tripulante.tiene(item)
 		})
 	}
 	
@@ -76,7 +80,10 @@ object busquedaDelTesoro inherits Mision{
 
 object convertirseEnLeyenda inherits Mision{
 	override method esUtil(tripulante){
-		return tripulante.items().size() >= 10 && tripulante.items().any({item=> item == "obligatorio"})
+		return 
+			tripulante.items().size() >= 10 &&
+			tripulante.tieneItem("obligatorio") 
+			//tripulante.items().any({item=> item == "obligatorio"})
 	}
 }
 
@@ -111,6 +118,8 @@ class BarcoPirata inherits Victima{
 	var tripulacion = []
 	const capacidadMaximaDePersonas = 0
 	
+	// OBS: EN clase le preguntaron a la mision si ese pirata era util, delegaron distinto
+	// Conclusión: Quizas.. porque el pirata puede mentir ? y la mision es la que en realidad sabe o no
 	method puedePertenecerALaTripulacion(pirata){
 		return self.hayLugar() && pirata.esUtil(mision) 
 	}
@@ -119,6 +128,7 @@ class BarcoPirata inherits Victima{
 		return tripulacion.size() < capacidadMaximaDePersonas	
 	}
 	
+	// OBS: En clase agregaron lanzar excepción si no se podia agregar...
 	method agregarALaTripulacion(pirata){
 		if(self.puedePertenecerALaTripulacion(pirata))
 			tripulacion.add(pirata)
@@ -138,24 +148,24 @@ class BarcoPirata inherits Victima{
 		
 		tripulacion.removeAll(tripulantes)
 	}
-	
-	// TODO: Revisar si es necesario
-	method esUtil() = self.tieneSuficienteTripulacion()
-	
+		
+	// TODO: Revisar
 	method tieneSuficienteTripulacion(){
 		return tripulacion.size() >= capacidadMaximaDePersonas*0.9
 	}
 	
 	method algunTripulanteTiene(item){
 		return tripulacion.any({
-			tripulante => tripulante.items().contains(item)
+			tripulante => tripulante.tieneItem(item)
 		})
 	}
 	
 	method esVulnerable(barco){
 		return tripulacion.size() < barco.tripulacion().size()/2
 	}
-	
+
+	// OBS #1: En clase generaron una capa de abstracción más, el puedeRealizarla por el barco que delega en la misión
+	// OBS #2: EN clase utilizaron count() con el criterio, en vez de filter y size
 	method esTemible(){
 		return mision.puedeSerRealizada(self) && self.tripulantesUtiles().size() >= 5
 	}
@@ -164,6 +174,7 @@ class BarcoPirata inherits Victima{
 		return tripulacion.filter({tripulante => tripulante.esUtil(mision) })
 	}
 	
+	// OBS: En clase usaron min(), count() y flatMap() ese ultimo es como el concatMap de haskell
 	method itemMasRaro(){
 		return tripulacion
 		.map({
@@ -176,9 +187,10 @@ class BarcoPirata inherits Victima{
 	
 	method anclar(ciudad){
 		self.tripulacionSeEmborracha(ciudad)		
-		self.elMasEbrioSePierde()
+		self.elMasEbrioSePierde(ciudad)
 	}
 	
+	// OBS: En clase filtraron quienes pueden pagarlo(delegaron), y luego tomar el trago
 	method tripulacionSeEmborracha(ciudad){
 		tripulacion.foreach({
 			tripulante => tripulante.tomarSiPuedeTragoGrogXD(ciudad)
@@ -194,12 +206,17 @@ class BarcoPirata inherits Victima{
 		tripulacion.remove(tripulante)
 	}
 	
+	// OBS: En clase no se evaluó si tenia la otella Grog, solo que esté pasadoDeGrog
+	method puedeSerSaqueadoPor(pirata){
+		return pirata.estaPasadoDeGrog() && pirata.tieneItem('botellaDeGrogXD')		
+	}
 }
 
 class CiudadCostera inherits Victima{	
 	var habitantes = []
 	const costoTragoGrogXD = 0
 	
+	// OBS:En clase lo delegaron en la persona el pago && exception 
 	method cobrarTragoGrogXD(persona){
 		if(persona.monedas() < costoTragoGrogXD)
 			self.error("Esta persona no tiene suficiente monedas para pagar el tragoGrogXD")
@@ -210,5 +227,7 @@ class CiudadCostera inherits Victima{
 	method agregarHabitante(habitante){
 		habitantes.add(habitante)
 	}
+	
+	method puedeSerSaqueadoPor(pirata) =  pirata.nivelDeEbriedad() >= 50
 }
  
