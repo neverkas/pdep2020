@@ -120,7 +120,9 @@ class BarcoPirata inherits Victima{
 	// TODO: Revisar si es necesario
 	method esUtil() = self.tieneSuficienteTripulacion()
 	
-	method tieneSuficienteTripulacion() = tripulacion.size() >= capacidadMaximaDePersonas*0.9
+	method tieneSuficienteTripulacion(){
+		return tripulacion.size() >= capacidadMaximaDePersonas*0.9
+	}
 	
 	method algunTripulanteTiene(item){
 		return tripulacion.any({
@@ -132,10 +134,22 @@ class BarcoPirata inherits Victima{
 		return tripulacion.size() < barco.tripulacion().size()/2
 	}
 	
-	method esTemible() = mision.puedeSerRealizada(self) && self.tripulantesUtiles().size() >= 5
+	method esTemible(){
+		return mision.puedeSerRealizada(self) && self.tripulantesUtiles().size() >= 5
+	}
 	
 	method tripulantesUtiles(){
 		return tripulacion.filter({tripulante => tripulante.esUtil(mision) })
+	}
+	
+	method itemMasRaro(){
+		return tripulacion
+		.map({
+			tripulante => tripulante.items()
+		})
+		.min({
+			item => self.algunTripulanteTiene(item)
+		})
 	}
 }
 
