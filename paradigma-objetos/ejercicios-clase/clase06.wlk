@@ -131,6 +131,12 @@ class BarcoPirata inherits Victima{
 	method esVulnerable(barco){
 		return tripulacion.size() < barco.tripulacion().size()/2
 	}
+	
+	method esTemible() = mision.puedeSerRealizada(self) && self.tripulantesUtiles().size() >= 5
+	
+	method tripulantesUtiles(){
+		return tripulacion.filter({tripulante => tripulante.esUtil(mision) })
+	}
 }
 
 class CiudadCostera inherits Victima{	
