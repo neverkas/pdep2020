@@ -19,6 +19,14 @@ class Pirata{
 	
 	method estaPasadoDeGrog() = self.nivelDeEbriedad() >= 90	
 
+	method tomarSiPuedeTragoGrogXD(ciudad){
+		ciudad.cobrarTragoGrogXD(self) // lanza exception si no puede pagar
+		nivelDeEbriedad += 5			
+	}
+	
+	method seQuedaEn(ciudad){
+		ciudad.agregarHabitante(self)
+	}
 }
 
 /*
@@ -151,8 +159,42 @@ class BarcoPirata inherits Victima{
 			item => self.algunTripulanteTiene(item)
 		})
 	}
+	
+	method anclar(ciudad){
+		self.tripulacionSeEmborracha(ciudad)		
+		self.elMasEbrioSePierde()
+	}
+	
+	method tripulacionSeEmborracha(ciudad){
+		tripulacion.foreach({
+			tripulante => tripulante.tomarSiPuedeTragoGrogXD(ciudad)
+		})		
+	}
+	
+	method elMasEbrioSePierde(ciudad){
+		const tripulante = tripulacion.max({
+			tripulante => tripulante.nivelDeEbriedad()
+		})
+		
+		tripulante.seQuedaEn(ciudad)
+		tripulacion.remove(tripulante)
+	}
+	
 }
 
 class CiudadCostera inherits Victima{	
+	var habitantes = []
+	const costoTragoGrogXD = 0
+	
+	method cobrarTragoGrogXD(persona){
+		if(persona.monedas() < costoTragoGrogXD)
+			self.error("Esta persona no tiene suficiente monedas para pagar el tragoGrogXD")
+			
+		persona.monedas(persona.monedas() - costoTragoGrogXD)
+	}
+	
+	method agregarHabitante(habitante){
+		habitantes.add(habitante)
+	}
 }
  
