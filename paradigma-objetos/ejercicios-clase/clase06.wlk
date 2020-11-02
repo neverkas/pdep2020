@@ -1,3 +1,7 @@
+/*
+ * Tripulantes
+ */
+
 class Pirata{
 	// mapa, brujula, loro, cuchillo, botellaGrogXD
 	var items = []
@@ -26,6 +30,16 @@ class Pirata{
 	
 	method seQuedaEn(ciudad){
 		ciudad.agregarHabitante(self)
+	}
+}
+
+class EspiaDeLaCorona inherits Pirata{
+	var tienePermisoDeLaCorona = false
+	
+	override method estaPasadoDeGrog() = false
+	
+	override method seAnimaASaquear(){
+		super() && tienePermisoDeLaCorona	
 	}
 }
 
