@@ -1,0 +1,31 @@
+import parciales.vikingos.*
+
+describe "Primer Punto" {
+	const miami = new Expedicion()
+	
+	test "Un soldado no productivo, no puede subir a una expedicion" {
+		const soldadito = new Soldado(castaSocial=thrall, vidasCobradas=0, cantidadArmas=0)
+		
+		assert.notThat(soldadito.puedeIr(miami))
+	
+	}
+	
+	test "Un soldado sin armas y asesinatos, no puede subir a una expedición" {
+		const soldadito = new Soldado(castaSocial=thrall, vidasCobradas=20, cantidadArmas=0)
+		
+		assert.notThat(soldadito.puedeIr(miami))
+	}	
+
+	test "Un soldado con armas y sin asesinatos, no puede subir a una expedición" {
+		const soldadito = new Soldado(castaSocial=thrall, vidasCobradas=0, cantidadArmas=1)
+		
+		assert.notThat(soldadito.puedeIr(miami))
+	}
+		
+	test "Un soldado con armas y 20 asesinatos, si puede subir a una expedición" {
+		const soldadito = new Soldado(castaSocial=thrall, vidasCobradas=20, cantidadArmas=1)
+		
+		assert.that(soldadito.puedeIr(miami))
+	}	
+
+}
