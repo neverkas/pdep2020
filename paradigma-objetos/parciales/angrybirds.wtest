@@ -1,0 +1,19 @@
+import parciales.angrybirds.*
+
+describe "group of tests" {
+
+	test "Un pajaro comun con 10 de ira, tiene 20 de fuerza" {
+		const pajaroComun = new Pajaro(ira=10)
+		pajaroComun.hacerEnojar()
+		assert.equals(20, pajaroComun.fuerza())
+
+	}
+	
+	test "el pajaro red se enoja 2 veces y tiene 3 de ira tiene 60 de fuerza"{
+		red.vecesQueSeEnojo(2)
+		red.ira(3)
+		
+		assert.equals(60, red.fuerza())
+	}
+	
+}
