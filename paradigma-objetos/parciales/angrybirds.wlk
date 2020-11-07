@@ -63,7 +63,7 @@ class Pajaro{
 	var property ira
 	
 	method hacerEnojar(){
-		fuerza += 2 * ira
+		fuerza = 2 * ira
 	}
 	
 	method esFuerte() = fuerza > 50
