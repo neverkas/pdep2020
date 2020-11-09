@@ -4,23 +4,27 @@ class Persona{
 	var memoriaALargoPlazo = []
 	var property nivelDeFelicidad
 	var emocionDominante
-	var estadoDeAnimoActual // no es lo mismo que emocionDominante?
+	//var estadoDeAnimoActual
 	
-	method vivirEvento	(_descripcion, _fecha)
+	method vivirEvento(descripcion)
 	method dormir()
 	
-	method niega(recuerdo) =
-		estadoDeAnimoActual.negar(recuerdo) 	
+	// Observación: Tenias dudas si eran lo mismo
+	//method niega(recuerdo) = estadoDeAnimoActual.negar(recuerdo)
+	method niega(recuerdo) = emocionDominante.negar(recuerdo) 	
 	
 	method asentar(recuerdo) = 
 		recuerdo.serAsentadoPor(self)
+	
+	// TODO:
+	// - En realidad deberias ordenarlos por fecha y luego tomar los 5
+	method recuerdosRecientesDelDia() = recuerdosDelDia.reverse().take(5)
 		
-	method recuerdosRecientesDelDia() =
-		recuerdosDelDia.reverse().take(5)
-		
+	// Observacion: Los pensamientos eran recuerdos, es lo mismo
 	method pensamientosCentralesDificiles() =
 		pensamientosCentrales.filter({
-			pensamiento => pensamiento.esDificilDeExplicar()
+			recuerdo => recuerdo.esDificilDeExplicar()
+			//pensamiento => pensamiento.esDificilDeExplicar()
 		}) 
 	
 	// adicionales
@@ -38,8 +42,14 @@ class Persona{
 }
 
 object riley inherits Persona(nivelDeFelicidad=1000){
-	override method vivirEvento(_descripcion, _fecha){
-		const recuerdo = new Recuerdo(descripcion=_descripcion, fecha=_fecha, emocion=emocionDominante)
+	// CORRECCION:
+	// - No era necesario pasarle el parámetro fecha
+	// - Podías usar la clase Date de la sig manera.: new Date()
+	
+	//override method vivirEvento(_descripcion, _fecha){
+	//	const recuerdo = new Recuerdo(descripcion=_descripcion, fecha=_fecha, emocion=emocionDominante)
+	override method vivirEvento(descripcion){
+		const recuerdo = new Recuerdo(descripcion=descripcion, fecha=new Date(), emocion=emocionDominante)
 		recuerdosDelDia.add(recuerdo)
 	}
 	
@@ -47,6 +57,8 @@ object riley inherits Persona(nivelDeFelicidad=1000){
 		self.desencadenarProcesosMentales()
 	}
 	
+	// Observación: 
+	// - La resolución utilizó una colección del tipo lista, y apply()
 	method desencadenarProcesosMentales(){
 		const palabraClave
 		
@@ -153,7 +165,10 @@ class Recuerdo{
 	const emocion
 	var property esCentral = false
 	
-	method asentarse(persona, recuerdo){
+	// Observación:
+	// - La resolución guardó como referencia al poseedor del recuerdo
+	// por tanto no pasaba por parámetro a la persona en serAsentadoPor()
+	method serAsentadoPor(persona){
 		emocion.asentarse(persona, self)					
 	}
 	
@@ -169,15 +184,21 @@ class Recuerdo{
 //
 
 object alegre{
+	// Observacion:
+	// - Estaba bien, pero faltaba delegar en puedoAsentarme()
 	method asentarse(persona, recuerdo){
-		if(persona.nivelDeFelicidad() > 500){
+		if(self.puedoAsentarme(persona, recuerdo)){
+		//if(persona.nivelDeFelicidad() > 500){
 			persona.pensamientosCentrales().add(recuerdo)
-			recuerdo.convertirseEnCentral()			
+			// Observacion: No era necesario este flag
+			//recuerdo.convertirseEnCentral()			
 		}
 	}
 	
-	method negar(recuerdo) =
-		!(not recuerdo.tipo() == alegre)
+	method puedoAsentarme(persona, recuerdo) = persona.nivelDeFelicidad() > 500
+		
+	//method negar(recuerdo) = !(not recuerdo.tipo() == alegre)
+	method negar(recuerdo) = recuerdo.tipo() != alegre
 }
 
 object triste{
@@ -186,19 +207,35 @@ object triste{
 		persona.reducirFelicidadEn(persona.nivelDeFelicidad()*0.10)
 	}
 
-	method negar(recuerdo) =
-		!(recuerdo.tipo() == alegre)
+	method negar(recuerdo) = recuerdo.tipo() == alegre
+	//method negar(recuerdo) = !(recuerdo.tipo() == alegre)
 }
 
+// Observacion: Si los anteriores (alegre, triste) retornan algo al negar
+// estos tambień
 object disgusto{
 	method asentarse(persona, recuerdo){}
-	method negar(recuerdo){ }
+	
+	//method negar(recuerdo){ }
+		method negar(recuerdo){
+		return false
+	}
+
 }
 object furioso{
 	method asentarse(persona, recuerdo){}
-	method negar(recuerdo){ }
+	//method negar(recuerdo){ }
+	method negar(recuerdo){
+		return false
+	}
+
 }
 object temeroso{
 	method asentarse(persona, recuerdo){}
-	method negar(recuerdo){ }
+	//method negar(recuerdo){ }
+	method negar(recuerdo){
+		return false
+	}
+	
+
 }
